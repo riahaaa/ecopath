@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.sungshin.ecopath"
+    namespace = "edu.sungshin.ecopath"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.sungshin.ecopath"
+        applicationId = "edu.sungshin.ecopath"
         minSdk = 21
         targetSdk = 34
         versionCode = 1
