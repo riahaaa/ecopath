@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingBottom="16dp"
+        android:id="@+id/profileSection">
+
+        <ImageView
+            android:id="@+id/profileImage"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:src="@drawable/ic_profileimage"
+            android:layout_marginEnd="8dp" />
+
+        <!-- 사용자 아이디 -->
+        <TextView
+            android:id="@+id/userId"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="홍길동님, 환영합니다!"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- 닫기 버튼 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="X"
+        android:textSize="18sp"
+        android:layout_alignParentEnd="true"
+        android:onClick="finish" />
+
+    <!-- 전화번호 추가 -->
+    <TextView
+        android:id="@+id/phoneNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:text="전화번호: 010-1234-5678"
+        android:textSize="16sp"
+        android:paddingTop="16dp"/>
+
+    <!-- 서비스 탈퇴 및 회원정보 수정 버튼 추가 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_below="@id/profileSection"
+        android:paddingTop="24dp">
+
+        <TextView
+            android:id="@+id/modifyProfile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="회원정보 수정"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:onClick="onModifyProfileClick"/>
+
+        <TextView
+            android:id="@+id/cancelService"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="서비스 탈퇴"
+            android:textSize="16sp"
+            android:padding="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:onClick="onCancelServiceClick"/>
+    </LinearLayout>
+
+</RelativeLayout>
