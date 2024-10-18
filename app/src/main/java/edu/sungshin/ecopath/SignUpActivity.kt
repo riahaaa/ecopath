@@ -80,47 +80,47 @@ class SignUpActivity : AppCompatActivity() {
             editTextPassword.requestFocus()
             return
         }
-        if(emailVerification){
-            Toast.makeText(this, "이메일을 인증해주세요", Toast.LENGTH_SHORT).show()
-            buttonEmailVerification.requestFocus()
-            return
-        }
 
-        // 아이디 중복 체크
-        checkUsernameAvailability(username) { isAvailable ->
-            if (isAvailable) {
-                mAuth.createUserWithEmailAndPassword(username, password).addOnCompleteListener(this) { task ->
-                    if (task.isSuccessful) {
+        // 이메일 인증 여부 확인
+        val user = mAuth.currentUser
+        user?.reload()?.addOnSuccessListener {
+            if (user.isEmailVerified) {
+                // 아이디 중복 체크
+                checkUsernameAvailability(username) { isAvailable ->
+                    if (isAvailable) {
+                        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
+                            if (task.isSuccessful) {
 
-                        // Firestore에 사용자 정보 저장
-                        val user = mAuth.currentUser
-                        val userId = user?.uid
-                        if (userId != null) {
-                            val db = FirebaseFirestore.getInstance()
-                            val userMap = hashMapOf(
-                                "username" to username,
-                                "email" to email
-                            )
-                            db.collection("users").document(userId).set(userMap)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "회원가입을 성공했습니다", Toast.LENGTH_LONG).show()
-                                    Intent(this, LoginActivity::class.java).also { startActivity(it) }
-                                    finish()
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(this, "회원가입에 실패했습니다", Toast.LENGTH_SHORT).show()
-                                }
-                        } else {
-                            Toast.makeText(this, "회원가입에 실패했습니다", Toast.LENGTH_SHORT).show()
+                                // Firestore에 사용자 정보 저장
+                                val userId = user.uid
+                                val db = FirebaseFirestore.getInstance()
+                                val userMap = hashMapOf(
+                                    "username" to username,
+                                    "email" to email
+                                )
+                                db.collection("users").document(userId).set(userMap)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this, "회원가입을 성공했습니다", Toast.LENGTH_LONG).show()
+                                        Intent(this, LoginActivity::class.java).also { startActivity(it) }
+                                        finish()
+                                    }
+                                    .addOnFailureListener {
+                                        Toast.makeText(this, "회원가입에 실패했습니다", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(this, "회원가입에 실패했습니다: 오류 발생", Toast.LENGTH_SHORT).show()
+                            }
                         }
                     } else {
-                        Toast.makeText(this, "회원가입에 실패했습니다: 오류 발생", Toast.LENGTH_SHORT).show()
+                        editTextUsername.error = "중복된 아이디입니다"
+                        editTextUsername.requestFocus()
                     }
                 }
             } else {
-                editTextUsername.error = "중복된 아이디입니다"
-                editTextUsername.requestFocus()
+                Toast.makeText(this, "이메일을 인증해주세요", Toast.LENGTH_SHORT).show()
             }
+        }?.addOnFailureListener {
+            Toast.makeText(this, "사용자 정보를 다시 불러오는 데 실패했습니다", Toast.LENGTH_SHORT).show()
         }
     }
 
