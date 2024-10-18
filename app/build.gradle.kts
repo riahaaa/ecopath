@@ -40,7 +40,8 @@ dependencies {
     implementation("androidx.core:core-ktx:1.13.1") // Android KTX 라이브러리
     implementation("androidx.appcompat:appcompat:1.7.0") // AppCompat 라이브러리
     implementation("com.google.android.material:material:1.12.0") // Material Components
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4") // ConstraintLayout
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.firebase:firebase-database:21.0.0") // ConstraintLayout
 
     testImplementation("junit:junit:4.13.2") // JUnit 테스트 라이브러리
     androidTestImplementation("androidx.test.ext:junit:1.2.1") // AndroidX 테스트 라이브러리
@@ -54,4 +55,6 @@ dependencies {
 
     // Firebase Firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation ("com.google.firebase:firebase-database-ktx:20.3.0")
+
 }

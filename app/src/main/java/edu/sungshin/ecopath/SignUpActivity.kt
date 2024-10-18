@@ -7,18 +7,22 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 
 class SignUpActivity : AppCompatActivity() {
     private lateinit var mAuth: FirebaseAuth
-    lateinit var buttonSignUp : Button
-    lateinit var editTextEmail : EditText
-    lateinit var editTextConfirmPassword : EditText
-    lateinit var editTextPassword : EditText
-    lateinit var editTextUsername : EditText
-    lateinit var buttonEmailVerification: Button
-    private var emailVerification: Boolean = false
+    private lateinit var mDatabaseRef: DatabaseReference
+
+    private lateinit var buttonSignUp: Button
+    private lateinit var editTextEmail: EditText
+    private lateinit var editTextConfirmPassword: EditText
+    private lateinit var editTextPassword: EditText
+    private lateinit var editTextUsername: EditText
 
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,136 +30,127 @@ class SignUpActivity : AppCompatActivity() {
         setContentView(R.layout.activity_signup)
 
         mAuth = FirebaseAuth.getInstance()
+        mDatabaseRef = FirebaseDatabase.getInstance().reference.child("ecopath")
 
-        buttonSignUp = findViewById(R.id.buttonSignUp)
         buttonSignUp = findViewById(R.id.buttonSignUp)
         editTextEmail = findViewById(R.id.editTextEmail)
         editTextConfirmPassword = findViewById(R.id.editTextConfirmPassword)
         editTextPassword = findViewById(R.id.editTextPassword)
         editTextUsername = findViewById(R.id.editTextUsername)
-        buttonEmailVerification = findViewById(R.id.buttonEmailVerification)
 
         buttonSignUp.setOnClickListener {
-            SignUpUser()
-        }
+            val email = editTextEmail.text.toString().trim()
+            val password = editTextPassword.text.toString().trim()
+            val confirmedPassword = editTextConfirmPassword.text.toString().trim()
+            val username = editTextUsername.text.toString().trim()
 
-        buttonEmailVerification.setOnClickListener {
-            sendEmailVerification()
+            if (!isInputValid(
+                    username,
+                    email,
+                    password,
+                    confirmedPassword
+                )
+            ) return@setOnClickListener
+
+            // 아이디 중복 체크
+            checkUsernameAvailability(username) { isAvailable ->
+                if (isAvailable) {
+                    mAuth.createUserWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(this, OnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                val firebaseUser: FirebaseUser? = mAuth.currentUser
+                                val account = UserAccount()
+                                if (firebaseUser != null) {
+                                    val account = UserAccount().apply {
+                                        this.email = firebaseUser.email
+                                        this.ID = username
+                                        this.password = password
+                                        this.IdToken = firebaseUser.uid
+                                    }
+                                    mDatabaseRef.child("UserAccount").child(firebaseUser.uid)
+                                        .setValue(account)
+
+                                    Toast.makeText(this, "회원가입이 완료됐습니다", Toast.LENGTH_SHORT).show()
+                                    val intent = Intent(this, LoginActivity::class.java)
+                                    startActivity(intent)
+                                    finish()
+
+                                } else {
+                                    Toast.makeText(this, "회원가입을 실패했습니다.", Toast.LENGTH_SHORT).show()
+
+                                }
+
+                            }else {
+                                // 오류 처리
+                                Toast.makeText(this, task.exception?.message ?: "회원가입을 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            }
+                        })
+                } else {
+                    editTextUsername.error = "중복된 아이디입니다"
+                    editTextUsername.requestFocus()
+                }
+            }
         }
     }
 
-    private fun SignUpUser() {
-        val email = editTextEmail.text.toString().trim()
-        val password = editTextPassword.text.toString().trim()
-        val confirmedPassword = editTextConfirmPassword.text.toString().trim()
-        val username = editTextUsername.text.toString().trim()
 
+    private fun isInputValid(
+        username: String,
+        email: String,
+        password: String,
+        confirmedPassword: String
+    ): Boolean {
+        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            editTextEmail.error = "유효한 이메일을 입력하세요"
+            editTextEmail.requestFocus()
+            return false
+        }
         if (username.isEmpty()) {
             editTextUsername.error = "아이디를 입력해주세요"
             editTextUsername.requestFocus()
-            return
+            return false
         }
         if (email.isEmpty()) {
             editTextEmail.error = "이메일을 입력하세요"
             editTextEmail.requestFocus()
-            return
+            return false
         }
         if (password.isEmpty()) {
-            editTextPassword.error = "비밀번호가 입력되지 않았습니다"
+            editTextPassword.error = "비밀번호를 입력하세요"
             editTextPassword.requestFocus()
-            return
+            return false
         }
         if (confirmedPassword.isEmpty()) {
             editTextConfirmPassword.error = "비밀번호를 확인해주세요"
             editTextConfirmPassword.requestFocus()
-            return
+            return false
         }
         if (password != confirmedPassword) {
-            editTextConfirmPassword.error = "비밀번호가 맞지 않습니다"
+            editTextConfirmPassword.error = "비밀번호가 일치하지 않습니다"
             editTextConfirmPassword.requestFocus()
-            return
+            return false
         }
         if (password.length < 6) {
-            editTextPassword.error = "비밀번호는 6자리 이상으로 입력하세요"
+            editTextPassword.error = "비밀번호는 6자리 이상이어야 합니다"
             editTextPassword.requestFocus()
-            return
+            return false
         }
-
-        // 이메일 인증 여부 확인
-        val user = mAuth.currentUser
-        user?.reload()?.addOnSuccessListener {
-            if (user.isEmailVerified) {
-                // 아이디 중복 체크
-                checkUsernameAvailability(username) { isAvailable ->
-                    if (isAvailable) {
-                        mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(this) { task ->
-                            if (task.isSuccessful) {
-
-                                // Firestore에 사용자 정보 저장
-                                val userId = user.uid
-                                val db = FirebaseFirestore.getInstance()
-                                val userMap = hashMapOf(
-                                    "username" to username,
-                                    "email" to email
-                                )
-                                db.collection("users").document(userId).set(userMap)
-                                    .addOnSuccessListener {
-                                        Toast.makeText(this, "회원가입을 성공했습니다", Toast.LENGTH_LONG).show()
-                                        Intent(this, LoginActivity::class.java).also { startActivity(it) }
-                                        finish()
-                                    }
-                                    .addOnFailureListener {
-                                        Toast.makeText(this, "회원가입에 실패했습니다", Toast.LENGTH_SHORT).show()
-                                    }
-                            } else {
-                                Toast.makeText(this, "회원가입에 실패했습니다: 오류 발생", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    } else {
-                        editTextUsername.error = "중복된 아이디입니다"
-                        editTextUsername.requestFocus()
-                    }
-                }
-            } else {
-                Toast.makeText(this, "이메일을 인증해주세요", Toast.LENGTH_SHORT).show()
-            }
-        }?.addOnFailureListener {
-            Toast.makeText(this, "사용자 정보를 다시 불러오는 데 실패했습니다", Toast.LENGTH_SHORT).show()
-        }
+        return true
     }
 
     // 아이디 중복 확인 함수
     private fun checkUsernameAvailability(username: String, callback: (Boolean) -> Unit) {
         val db = FirebaseFirestore.getInstance()
-
         db.collection("users")
             .whereEqualTo("username", username)
             .get()
             .addOnSuccessListener { documents ->
-                if (documents.isEmpty) {
-                    callback(true)  // 사용 가능한 아이디
-                } else {
-                    Toast.makeText(this, "이미 존재하는 아이디 입니다", Toast.LENGTH_SHORT).show()
-                    callback(false)  // 이미 존재하는 아이디
-                }
+                callback(documents.isEmpty)  // 사용 가능한 아이디
             }
             .addOnFailureListener {
-                Toast.makeText(this, "중복된 아이디 확인 실패", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "중복 검사 실패", Toast.LENGTH_SHORT).show()
                 callback(false)  // 중복으로 처리
             }
     }
 
-    // 이메일 인증 함수
-    private fun sendEmailVerification() {
-        val user = mAuth.currentUser
-        user?.sendEmailVerification()
-            ?.addOnCompleteListener { task ->
-                if (task.isSuccessful) {
-                    Toast.makeText(this, "인증 이메일이 전송되었습니다", Toast.LENGTH_SHORT).show()
-                    emailVerification = true
-                } else {
-                    Toast.makeText(this, "인증 이메일 전송 실패", Toast.LENGTH_SHORT).show()
-                }
-            }
-    }
 }

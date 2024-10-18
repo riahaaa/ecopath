@@ -26,6 +26,7 @@ class IntroActivity : AppCompatActivity() {
             // 명시적으로 로그아웃 처리 (세션 초기화)
             auth.signOut()
 
+
             // 로그인 상태에 따라 화면 전환
             val intent = if (auth.currentUser != null) {
                 // 사용자가 로그인되어 있으면 HomeActivity로 이동

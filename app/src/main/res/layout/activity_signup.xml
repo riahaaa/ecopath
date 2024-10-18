@@ -1,8 +1,6 @@
-<!-- activity_sign_up.xml -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:padding="16dp"
     android:gravity="center">
@@ -37,32 +35,15 @@
         android:background="@android:drawable/edit_text"
         android:layout_marginBottom="8dp" />
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/editTextEmail"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="16dp">
-
-        <EditText
-            android:id="@+id/editTextEmail"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="이메일"
-            android:inputType="textEmailAddress"
-            android:padding="12dp"
-            android:background="@android:drawable/edit_text"
-            android:layout_weight="1"
-            android:layout_marginEnd="8dp" />
-
-        <Button
-            android:id="@+id/buttonEmailVerification"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="인증"
-            android:backgroundTint="@color/green"
-            android:textColor="@android:color/white"
-            android:padding="12dp" />
-    </LinearLayout>
+        android:hint="이메일"
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
+        android:background="@android:drawable/edit_text"
+        android:layout_marginBottom="8dp" />
 
     <Button
         android:id="@+id/buttonSignUp"
