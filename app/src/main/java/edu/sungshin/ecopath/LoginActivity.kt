@@ -48,6 +48,13 @@ class LoginActivity : AppCompatActivity() {
             val intent = Intent(this, SignUpActivity::class.java)
             startActivity(intent)
         }
+
+        // 비밀번호 찾기 버튼 설정
+        val searchPasswordButton: Button = findViewById(R.id.searchpasswordButton)
+        searchPasswordButton.setOnClickListener {
+            val intent = Intent(this, SearchPasswordActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     // Firebase 이메일/비밀번호 로그인 처리
@@ -62,10 +69,12 @@ class LoginActivity : AppCompatActivity() {
                     finish()
                 } else {
                     // 로그인 실패
-                    Toast.makeText(this, "로그인 실패: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(
+                        this,
+                        "로그인 실패: ${task.exception?.message}",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
     }
 }
-
-
