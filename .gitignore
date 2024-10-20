@@ -16,3 +16,4 @@ local.properties
 # Ignore Firebase config file
 /app/google-services.json
 /ecopath-97053-firebase-adminsdk-i6hkb-adba53b6a5.json
+/appInsightsSettings.xml
