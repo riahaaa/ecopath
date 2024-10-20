@@ -23,15 +23,15 @@
 
     <ImageView
         android:id="@+id/leafImage"
-        android:layout_width="92dp"
-        android:layout_height="97dp"
-        android:src="@drawable/leaf"
+        android:layout_width="74dp"
+        android:layout_height="81dp"
+        android:src="@drawable/ic_leaf"
         app:layout_constraintBottom_toTopOf="@+id/emailEditText"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.858"
+        app:layout_constraintHorizontal_bias="0.821"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.58" />
+        app:layout_constraintVertical_bias="0.515" />
 
     <EditText
         android:id="@+id/emailEditText"
@@ -102,7 +102,7 @@
         android:layout_marginEnd="32dp"
         android:backgroundTint="#4CAF50"
         android:padding="16dp"
-        android:text="아이디/비밀번호 찾기"
+        android:text="비밀번호 찾기"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -127,8 +127,8 @@
         <!-- 구글 로그인 버튼 -->
         <ImageButton
             android:id="@+id/naverLoginButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="77dp"
+            android:layout_height="79dp"
             android:layout_margin="16dp"
             android:contentDescription="Naver Login"
             android:padding="10dp"
@@ -137,8 +137,8 @@
 
         <ImageButton
             android:id="@+id/googleLoginButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="77dp"
+            android:layout_height="79dp"
             android:layout_margin="16dp"
             android:contentDescription="Google Login"
             android:padding="10dp"
@@ -148,8 +148,8 @@
         <!-- 카카오 로그인 버튼 -->
         <ImageButton
             android:id="@+id/kakaoLoginButton"
-            android:layout_width="100dp"
-            android:layout_height="100dp"
+            android:layout_width="77dp"
+            android:layout_height="79dp"
             android:layout_margin="16dp"
             android:contentDescription="Kakao Login"
             android:padding="10dp"
