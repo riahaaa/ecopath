@@ -58,7 +58,7 @@
 
     <!-- 탄소배출량을 줄일 수 있는 대안으로 제시 -->
     <Button
-        android:id="@+id/button"
+        android:id="@+id/buttonEcoAlternative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:backgroundTint="@color/green"
