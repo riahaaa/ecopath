@@ -100,6 +100,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
 
+        <Button
+            android:id="@+id/calculatebutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:text="탄소배출량 계산해보기"
+            android:textColorLink="@color/black" />
+
 
     </LinearLayout>
 

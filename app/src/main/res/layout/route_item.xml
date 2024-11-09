@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="10dp"
+    android:layout_marginBottom="8dp"
+    android:background="?attr/selectableItemBackground">
+
+    <!-- 교통 수단 아이콘 -->
+    <ImageView
+        android:id="@+id/imageViewTransportMode"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_car" />
+
+    <!-- 경로 정보 -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_weight="1"
+        android:paddingStart="8dp">
+
+        <TextView
+            android:id="@+id/textViewRouteInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="경로 정보"
+            android:textStyle="bold"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/textViewRouteDuration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="소요 시간" />
+
+        <TextView
+            android:id="@+id/textViewRouteDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="거리" />
+    </LinearLayout>
+
+</LinearLayout>

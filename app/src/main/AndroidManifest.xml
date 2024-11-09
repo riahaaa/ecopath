@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-sdk tools:overrideLibrary="com.google.firebase.auth.ktx" />
     <application
         android:allowBackup="true"
@@ -59,5 +62,10 @@
             android:name=".CancelServiceActivity"
             android:exported="true">
         </activity>
+        <activity android:name=".CalculateActivity"
+            android:exported="true"></activity>
+        <activity android:name=".ConfirmActivity"
+            android:exported="true"></activity>
+
     </application>
 </manifest>

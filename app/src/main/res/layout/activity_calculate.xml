@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <!-- 출발지 -->
+    <EditText
+        android:id="@+id/editTextOrigin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="출발지 입력"
+        android:inputType="text" />
+
+    <!-- 목적지 -->
+    <EditText
+        android:id="@+id/editTextDestination"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="목적지 입력"
+        android:inputType="text" />
+
+    <!-- 경로 검색 -->
+    <Button
+        android:id="@+id/buttonSearch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/green"
+        android:text="검색" />
+
+    <!-- 경로 목록 RecyclerView -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="경로 목록"
+        android:textStyle="bold" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewRoutes"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
+
+    <!-- 탄소 배출량 출력 -->
+    <TextView
+        android:id="@+id/textViewCarbonEmission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:text="탄소 배출량:"
+        android:textSize="18dp"
+        android:textStyle="bold" />
+
+    <!-- 탄소배출량을 줄일 수 있는 대안으로 제시 -->
+    <Button
+        android:id="@+id/buttonEcoAlternative"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@color/green"
+        android:text="탄소배출량을 줄일 수 있는 친환경 대안 알아보기" />
+
+</LinearLayout>

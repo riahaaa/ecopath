@@ -58,4 +58,6 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation ("com.google.firebase:firebase-database-ktx:20.3.0")
 
+    implementation ("com.google.android.libraries.places:places:2.6.0")
+
 }
