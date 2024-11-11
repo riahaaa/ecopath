@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.common.api.Status
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.Place
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment
@@ -34,6 +35,9 @@ class CalculateActivity: AppCompatActivity() {
     private lateinit var textViewCarbonEmission: TextView
     private lateinit var buttonEcoAlternative: Button
     val apiKey = BuildConfig.MAPS_API_KEY
+
+    private var originLatLng: LatLng? = null
+    private var destinationLatLng: LatLng? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -91,8 +95,12 @@ class CalculateActivity: AppCompatActivity() {
         autocompleteFragment?.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteFragment?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                // 선택된 장소의 이름을 EditText에 설정
                 editText.setText(place.name)
+                if (fragmentId == R.id.fragment_autocomplete_origin) {
+                    originLatLng = place.latLng
+                } else if (fragmentId == R.id.fragment_autocomplete_destination) {
+                    destinationLatLng = place.latLng
+                }
                 Log.d("MainActivity", "Place selected: ${place.name}, Location: ${place.latLng}")
             }
 
@@ -103,33 +111,36 @@ class CalculateActivity: AppCompatActivity() {
     }
 
     private fun fetchRoutesFromAPI(origin: String, destination: String) {
-        // 공백과 특수 문자가 URL에 잘 맞게 처리
-        val encodedOrigin = URLEncoder.encode(origin, "UTF-8")
-        val encodedDestination = URLEncoder.encode(destination, "UTF-8")
+        val originLatLng = this.originLatLng
+        val destinationLatLng = this.destinationLatLng
 
-        val url = "https://maps.googleapis.com/maps/api/directions/json?" +
-                "origin=$encodedOrigin&destination=$encodedDestination&alternatives=true&key=$apiKey"
+        if (originLatLng != null && destinationLatLng != null) {
+            val url = "https://maps.googleapis.com/maps/api/directions/json?" +
+                    "origin=${originLatLng.latitude},${originLatLng.longitude}&destination=${destinationLatLng.latitude},${destinationLatLng.longitude}&alternatives=true&key=$apiKey"
 
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val response = URL(url).readText()
-                val routes = parseDirectionsApiResponse(response)
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val response = URL(url).readText()
+                    val routes = parseDirectionsApiResponse(response)
 
-                withContext(Dispatchers.Main) {
-                    if (routes.isNotEmpty()) {
-                        recyclerViewRoutes.adapter = RouteAdapter(routes) { selectedRoute ->
-                            showSelectedRouteAndCarbonEmission(selectedRoute)
+                    withContext(Dispatchers.Main) {
+                        if (routes.isNotEmpty()) {
+                            recyclerViewRoutes.adapter = RouteAdapter(routes) { selectedRoute ->
+                                showSelectedRouteAndCarbonEmission(selectedRoute)
+                            }
+                        } else {
+                            Toast.makeText(this@CalculateActivity, "경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                         }
-                    } else {
-                        Toast.makeText(this@CalculateActivity, "경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                    }
+                } catch (e: Exception) {
+                    Log.e("CalculateActivity", "Error fetching routes", e)
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(this@CalculateActivity, "경로를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Error fetching routes", e)
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@CalculateActivity, "경로를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                }
             }
+        } else {
+            Toast.makeText(this, "출발지와 목적지를 선택해주세요.", Toast.LENGTH_SHORT).show()
         }
     }
 
