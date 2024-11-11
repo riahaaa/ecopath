@@ -33,7 +33,7 @@ class CalculateActivity: AppCompatActivity() {
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
     private lateinit var buttonEcoAlternative: Button
-    val apiKey = getString(R.string.google_maps_key)
+    val apiKey = BuildConfig.MAPS_API_KEY
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

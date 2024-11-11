@@ -16,6 +16,15 @@ android {
         versionName = "1.0" // 버전 이름
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // 테스트 러너 설정
+
+        // local.properties에서 MAPS_API_KEY를 읽기
+        val mapsApiKey: String? = project.findProperty("MAPS_API_KEY") as String?
+        // MAPS_API_KEY 값이 있다면 buildConfigField를 사용
+        buildConfigField("String", "MAPS_API_KEY", "\"${mapsApiKey ?: ""}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -34,6 +43,7 @@ android {
     kotlinOptions {
         jvmTarget = "1.8" // Kotlin JVM 타겟
     }
+
 }
 
 dependencies {
@@ -42,23 +52,24 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0") // Material Components
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.firebase:firebase-auth:23.0.0") // ConstraintLayout
+    implementation("com.google.firebase:firebase-auth:23.0.0")
 
-    testImplementation("junit:junit:4.13.2") // JUnit 테스트 라이브러리
-    androidTestImplementation("androidx.test.ext:junit:1.2.1") // AndroidX 테스트 라이브러리
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1") // Espresso 테스트 라이브러리
+    // Google Places API
+    implementation("com.google.android.libraries.places:places:4.0.0")
 
-    // Firebase BoM 가져오기
+    // Firebase BoM 설정
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-    implementation("com.google.firebase:firebase-analytics") // Firebase Analytics 라이브러리
-    // Firebase Authentication
+    implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth-ktx")
-
-    // Firebase Firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
-    implementation ("com.google.firebase:firebase-database-ktx:20.3.0")
+    implementation("com.google.firebase:firebase-database-ktx")
 
-    // Google Play Services 의존성
-    implementation ("com.google.android.gms:play-services-places:18.0.1")
-    implementation ("com.google.android.libraries.places:places-compat:2.7.0")
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-places:18.1.0")
+    implementation("com.google.android.gms:play-services-maps:18.0.0")
+
+    // 테스트 관련
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
