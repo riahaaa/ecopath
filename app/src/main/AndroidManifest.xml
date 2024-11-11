@@ -34,6 +34,9 @@
             android:name=".HomeActivity"
             android:exported="false">
         </activity>
+        <activity android:name=".CalculateActivity"
+            android:exported="true">
+        </activity>
         <activity
             android:name=".SignUpActivity"
             android:exported="false">
@@ -42,10 +45,6 @@
             android:name=".SearchidActivity"
             android:exported="false"
             tools:ignore="Instantiatable" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-        </activity>
         <activity
             android:name=".ForgotPasswordActivity"
             android:exported="false"/>
@@ -64,6 +63,9 @@
             android:name=".CancelServiceActivity"
             android:exported="true">
         </activity>
+
+        <activity android:name=".ConfirmActivity"
+            android:exported="true"></activity>
 
 
     </application>

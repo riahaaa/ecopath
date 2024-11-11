@@ -39,6 +39,8 @@ class CalculateActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calculate)
 
+
+
         // 초기화
         editTextOrigin = findViewById(R.id.editTextOrigin)
         editTextDestination = findViewById(R.id.editTextDestination)
