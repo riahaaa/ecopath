@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
+import java.net.URLEncoder
 
 class CalculateActivity: AppCompatActivity() {
 
@@ -32,6 +33,7 @@ class CalculateActivity: AppCompatActivity() {
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
     private lateinit var buttonEcoAlternative: Button
+    val apiKey = getString(R.string.google_maps_key)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,13 +47,16 @@ class CalculateActivity: AppCompatActivity() {
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
         buttonEcoAlternative = findViewById(R.id.buttonEcoAlternative)
 
+        setupAutocompleteFragment(R.id.fragment_autocomplete_origin, editTextOrigin)
+        setupAutocompleteFragment(R.id.fragment_autocomplete_destination, editTextDestination)
+
         // RecyclerView 설정
         recyclerViewRoutes.layoutManager = LinearLayoutManager(this)
         recyclerViewRoutes.setHasFixedSize(true)
 
         // Google Places API 초기화
         if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, "YOUR_API_KEY")  // YOUR_API_KEY를 실제 API 키로 교체
+            Places.initialize(applicationContext, apiKey)
         }
 
 
@@ -95,9 +100,12 @@ class CalculateActivity: AppCompatActivity() {
     }
 
     private fun fetchRoutesFromAPI(origin: String, destination: String) {
-        val apiKey = "YOUR_API_KEY"  // 실제 API 키로 교체
+        // 공백과 특수 문자가 URL에 잘 맞게 처리
+        val encodedOrigin = URLEncoder.encode(origin, "UTF-8")
+        val encodedDestination = URLEncoder.encode(destination, "UTF-8")
+
         val url = "https://maps.googleapis.com/maps/api/directions/json?" +
-                "origin=${origin.replace(" ", "+")}&destination=${destination.replace(" ", "+")}&alternatives=true&key=$apiKey"
+                "origin=$encodedOrigin&destination=$encodedDestination&alternatives=true&key=$apiKey"
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -174,6 +182,8 @@ class CalculateActivity: AppCompatActivity() {
             "walking" -> 0.0
             "bicycling" -> 0.0
             "transit" -> 0.07
+            "electric driving" -> 0.05  // 전기차 배출 계수
+            "hybrid driving" -> 0.10    // 하이브리드차 배출 계수
             else -> 0.18
         }
         return distanceInKm * emissionFactor

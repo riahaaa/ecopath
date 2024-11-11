@@ -39,6 +39,14 @@
             android:layout_height="wrap_content"
             android:text="소요 시간"
             android:textSize="14sp" />
+
+        <!-- 경로 거리 -->
+        <TextView
+            android:id="@+id/textViewRouteDistance"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="거리"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>

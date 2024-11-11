@@ -58,4 +58,7 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation ("com.google.firebase:firebase-database-ktx:20.3.0")
 
+    // Google Play Services 의존성
+    implementation ("com.google.android.gms:play-services-places:18.0.1")
+    implementation ("com.google.android.libraries.places:places-compat:2.7.0")
 }
