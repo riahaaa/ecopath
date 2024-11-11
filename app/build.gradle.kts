@@ -1,26 +1,24 @@
 plugins {
-    id("com.android.application") // Android 애플리케이션 플러그인 적용
-    id("org.jetbrains.kotlin.android") // Kotlin Android 플러그인 적용
-    id("com.google.gms.google-services") // Google 서비스 플러그인 적용
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.gms.google-services")
 }
 
 android {
-    namespace = "edu.sungshin.ecopath" // 네임스페이스 설정
-    compileSdk = 34 // 컴파일 SDK 버전 설정
+    namespace = "edu.sungshin.ecopath"
+    compileSdk = 35
 
     defaultConfig {
-        applicationId = "edu.sungshin.ecopath" // 애플리케이션 ID
-        minSdk = 21 // 최소 SDK 버전
-        targetSdk = 34 // 타겟 SDK 버전
-        versionCode = 1 // 버전 코드
-        versionName = "1.0" // 버전 이름
+        applicationId = "edu.sungshin.ecopath"
+        minSdk = 23
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner" // 테스트 러너 설정
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // local.properties에서 MAPS_API_KEY를 읽기
-        val mapsApiKey: String? = project.findProperty("MAPS_API_KEY") as String?
-        // MAPS_API_KEY 값이 있다면 buildConfigField를 사용
-        buildConfigField("String", "MAPS_API_KEY", "\"${mapsApiKey ?: ""}\"")
+        val mapsApiKey: String = project.findProperty("MAPS_API_KEY") as String? ?: ""
+        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
     }
 
     buildFeatures {
@@ -29,7 +27,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false // 프로가드 활성화 여부
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -37,25 +35,19 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8 // 자바 호환성
-        targetCompatibility = JavaVersion.VERSION_1_8 // 자바 호환성
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = "1.8" // Kotlin JVM 타겟
+        jvmTarget = "1.8"
     }
-
 }
 
 dependencies {
-    implementation("androidx.core:core-ktx:1.13.1") // Android KTX 라이브러리
-    implementation("androidx.appcompat:appcompat:1.7.0") // AppCompat 라이브러리
-    implementation("com.google.android.material:material:1.12.0") // Material Components
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
-    implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.firebase:firebase-auth:23.0.0")
-
-    // Google Places API
-    implementation("com.google.android.libraries.places:places:4.0.0")
 
     // Firebase BoM 설정
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
@@ -65,8 +57,8 @@ dependencies {
     implementation("com.google.firebase:firebase-database-ktx")
 
     // Google Play Services
-    implementation("com.google.android.gms:play-services-places:18.1.0")
     implementation("com.google.android.gms:play-services-maps:18.0.0")
+    implementation("com.google.android.libraries.places:places:4.0.0")
 
     // 테스트 관련
     testImplementation("junit:junit:4.13.2")
