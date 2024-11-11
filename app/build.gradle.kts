@@ -1,8 +1,18 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
+
+// local.properties 파일을 읽기
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
+// MAPS_API_KEY 값을 가져오기
+val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
 
 android {
     namespace = "edu.sungshin.ecopath"
@@ -17,8 +27,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        val mapsApiKey: String = project.findProperty("MAPS_API_KEY") as String? ?: ""
-        buildConfigField("String", "MAPS_API_KEY", "\"$mapsApiKey\"")
+        buildConfigField("String", "MAPS_API_KEY", "\"${mapsApiKey}\"")
     }
 
     buildFeatures {

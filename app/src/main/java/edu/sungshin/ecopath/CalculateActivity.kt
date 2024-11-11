@@ -40,6 +40,7 @@ class CalculateActivity: AppCompatActivity() {
         setContentView(R.layout.activity_calculate)
 
 
+        Log.d("CalculateActivity", "API Key: $apiKey")
 
         // 초기화
         editTextOrigin = findViewById(R.id.editTextOrigin)
