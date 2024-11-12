@@ -46,17 +46,17 @@ class CalculateActivity : AppCompatActivity() {
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
         buttonEcoAlternative = findViewById(R.id.buttonEcoAlternative)
 
-        // Google Places API 초기화
-        if (!Places.isInitialized()) {
-            Places.initialize(applicationContext, apiKey)
-        }
-
-        setupAutocompleteFragment(R.id.fragment_autocomplete_origin, isOrigin = true)  // 출발지 힌트
-        setupAutocompleteFragment(R.id.fragment_autocomplete_destination, isOrigin = false)  // 목적지 힌트
+        setupAutocompleteFragment(R.id.fragment_autocomplete_origin, isOrigin = true)
+        setupAutocompleteFragment(R.id.fragment_autocomplete_destination, isOrigin = false)
 
         // RecyclerView 설정
         recyclerViewRoutes.layoutManager = LinearLayoutManager(this)
         recyclerViewRoutes.setHasFixedSize(true)
+
+        // Google Places API 초기화
+        if (!Places.isInitialized()) {
+            Places.initialize(applicationContext, apiKey)
+        }
 
         // 검색 버튼 클릭 리스너
         buttonSearch.setOnClickListener {
@@ -74,31 +74,22 @@ class CalculateActivity : AppCompatActivity() {
     }
 
     private fun setupAutocompleteFragment(fragmentId: Int, isOrigin: Boolean) {
+        // AutocompleteSupportFragment를 설정할 레이아웃에 추가
         val autocompleteFragment = supportFragmentManager
             .findFragmentById(fragmentId) as? AutocompleteSupportFragment
 
         autocompleteFragment?.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
-
-        // 출발지와 목적지에 따라 다른 힌트 설정
-        if (isOrigin) {
-            autocompleteFragment?.setHint("출발지 검색")
-        } else {
-            autocompleteFragment?.setHint("목적지 검색")
-        }
-
         autocompleteFragment?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
                 if (isOrigin) {
                     originLatLng = place.latLng
-                    Log.d("CalculateActivity", "Origin selected: ${place.name}, Location: ${place.latLng}")
                 } else {
                     destinationLatLng = place.latLng
-                    Log.d("CalculateActivity", "Destination selected: ${place.name}, Location: ${place.latLng}")
                 }
+                Log.d("CalculateActivity", "Place selected: ${place.name}, Location: ${place.latLng}")
             }
 
             override fun onError(status: Status) {
-                Toast.makeText(this@CalculateActivity, "장소를 가져오는데 문제가 발생했습니다.", Toast.LENGTH_SHORT).show()
                 Log.e("CalculateActivity", "An error occurred: $status")
             }
         })
@@ -110,8 +101,11 @@ class CalculateActivity : AppCompatActivity() {
 
         if (originLatLng != null && destinationLatLng != null) {
             val url = "https://maps.googleapis.com/maps/api/directions/json?" +
-                    "origin=${originLatLng.latitude},${originLatLng.longitude}&destination=${destinationLatLng.latitude},${destinationLatLng.longitude}&alternatives=true&key=$apiKey"
-            Log.d("CalculateActivity", "Directions API URL: $url")
+                    "origin=${originLatLng.latitude},${originLatLng.longitude}" +
+                    "&destination=${destinationLatLng.latitude},${destinationLatLng.longitude}" +
+                    "&alternatives=true&key=$apiKey"
+
+            Log.d("API Request", url)
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {

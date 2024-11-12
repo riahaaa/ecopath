@@ -104,7 +104,8 @@
             android:id="@+id/calculatebutton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="탄소배출량 계산 버튼" />
+            android:backgroundTint="@color/green"
+            android:text="원하는 경로의 탄소배출량을 계산해보세요" />
 
 
     </LinearLayout>
