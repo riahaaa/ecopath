@@ -1,11 +1,9 @@
 package edu.sungshin.ecopath
 
-
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -24,12 +22,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import java.net.URL
-import java.net.URLEncoder
 
-class CalculateActivity: AppCompatActivity() {
+class CalculateActivity : AppCompatActivity() {
 
-    private lateinit var editTextOrigin: EditText
-    private lateinit var editTextDestination: EditText
     private lateinit var buttonSearch: Button
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
@@ -43,19 +38,16 @@ class CalculateActivity: AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_calculate)
 
-
         Log.d("CalculateActivity", "API Key: $apiKey")
 
         // 초기화
-        editTextOrigin = findViewById(R.id.editTextOrigin)
-        editTextDestination = findViewById(R.id.editTextDestination)
         buttonSearch = findViewById(R.id.buttonSearch)
         recyclerViewRoutes = findViewById(R.id.recyclerViewRoutes)
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
         buttonEcoAlternative = findViewById(R.id.buttonEcoAlternative)
 
-        setupAutocompleteFragment(R.id.fragment_autocomplete_origin, editTextOrigin)
-        setupAutocompleteFragment(R.id.fragment_autocomplete_destination, editTextDestination)
+        setupAutocompleteFragment(R.id.fragment_autocomplete_origin, isOrigin = true)
+        setupAutocompleteFragment(R.id.fragment_autocomplete_destination, isOrigin = false)
 
         // RecyclerView 설정
         recyclerViewRoutes.layoutManager = LinearLayoutManager(this)
@@ -66,17 +58,12 @@ class CalculateActivity: AppCompatActivity() {
             Places.initialize(applicationContext, apiKey)
         }
 
-
-
         // 검색 버튼 클릭 리스너
         buttonSearch.setOnClickListener {
-            val origin = editTextOrigin.text.toString()
-            val destination = editTextDestination.text.toString()
-
-            if (origin.isNotEmpty() && destination.isNotEmpty()) {
-                fetchRoutesFromAPI(origin, destination)
+            if (originLatLng != null && destinationLatLng != null) {
+                fetchRoutesFromAPI()
             } else {
-                Toast.makeText(this, "출발지와 목적지를 입력해주세요.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "출발지와 목적지를 선택해주세요.", Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -86,31 +73,29 @@ class CalculateActivity: AppCompatActivity() {
         }
     }
 
-    private fun setupAutocompleteFragment(fragmentId: Int, editText: EditText) {
+    private fun setupAutocompleteFragment(fragmentId: Int, isOrigin: Boolean) {
         // AutocompleteSupportFragment를 설정할 레이아웃에 추가
-        // XML 레이아웃에 fragment를 추가해야 함
         val autocompleteFragment = supportFragmentManager
             .findFragmentById(fragmentId) as? AutocompleteSupportFragment
 
         autocompleteFragment?.setPlaceFields(listOf(Place.Field.ID, Place.Field.NAME, Place.Field.LAT_LNG))
         autocompleteFragment?.setOnPlaceSelectedListener(object : PlaceSelectionListener {
             override fun onPlaceSelected(place: Place) {
-                editText.setText(place.name)
-                if (fragmentId == R.id.fragment_autocomplete_origin) {
+                if (isOrigin) {
                     originLatLng = place.latLng
-                } else if (fragmentId == R.id.fragment_autocomplete_destination) {
+                } else {
                     destinationLatLng = place.latLng
                 }
-                Log.d("MainActivity", "Place selected: ${place.name}, Location: ${place.latLng}")
+                Log.d("CalculateActivity", "Place selected: ${place.name}, Location: ${place.latLng}")
             }
 
             override fun onError(status: Status) {
-                Log.e("MainActivity", "An error occurred: $status")
+                Log.e("CalculateActivity", "An error occurred: $status")
             }
         })
     }
 
-    private fun fetchRoutesFromAPI(origin: String, destination: String) {
+    private fun fetchRoutesFromAPI() {
         val originLatLng = this.originLatLng
         val destinationLatLng = this.destinationLatLng
 
@@ -139,8 +124,6 @@ class CalculateActivity: AppCompatActivity() {
                     }
                 }
             }
-        } else {
-            Toast.makeText(this, "출발지와 목적지를 선택해주세요.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -155,7 +138,7 @@ class CalculateActivity: AppCompatActivity() {
 
             val distance = legs.getJSONObject("distance").getString("text")
             val duration = legs.getJSONObject("duration").getString("text")
-            val travelMode = route.getString("summary")  // 운전, 도보, 자전거 등
+            val travelMode = route.getString("summary")
 
             routeList.add(
                 Route(
@@ -173,7 +156,6 @@ class CalculateActivity: AppCompatActivity() {
         val carbonEmission = calculateCarbonEmission(route.distance, route.travelMode)
         textViewCarbonEmission.text = "탄소 배출량: ${String.format("%.2f", carbonEmission)} kg"
 
-        // 선택된 경로 정보를 ConfirmActivity로 전달 (옵션)
         val intent = Intent(this, ConfirmActivity::class.java).apply {
             putExtra("selectedRouteInfo", route.info)
             putExtra("selectedRouteDistance", route.distance)
@@ -196,15 +178,14 @@ class CalculateActivity: AppCompatActivity() {
             "walking" -> 0.0
             "bicycling" -> 0.0
             "transit" -> 0.07
-            "electric driving" -> 0.05  // 전기차 배출 계수
-            "hybrid driving" -> 0.10    // 하이브리드차 배출 계수
+            "electric driving" -> 0.05
+            "hybrid driving" -> 0.10
             else -> 0.18
         }
         return distanceInKm * emissionFactor
     }
 
     private fun showEcoAlternatives() {
-        // 친환경 대안을 보여주는 다이얼로그 또는 새로운 화면으로 이동
         val builder = AlertDialog.Builder(this)
         builder.setTitle("친환경 대안")
             .setMessage("탄소 배출량을 줄일 수 있는 대안:\n\n- 도보\n- 자전거\n- 대중교통 이용")

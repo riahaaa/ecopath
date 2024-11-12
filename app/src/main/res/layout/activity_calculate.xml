@@ -6,34 +6,21 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 출발지 -->
-    <EditText
-        android:id="@+id/editTextOrigin"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="출발지 입력"
-        android:inputType="text" />
+    <!-- 출발지 Autocomplete Fragment -->
     <fragment
         android:id="@+id/fragment_autocomplete_origin"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-
-    <!-- 목적지 -->
-    <EditText
-        android:id="@+id/editTextDestination"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="목적지 입력"
-        android:inputType="text" />
+    <!-- 목적지 Autocomplete Fragment -->
     <fragment
         android:id="@+id/fragment_autocomplete_destination"
         android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <!-- 경로 검색 -->
+    <!-- 경로 검색 버튼 -->
     <Button
         android:id="@+id/buttonSearch"
         android:layout_width="match_parent"
@@ -67,7 +54,7 @@
         android:textSize="18dp"
         android:textStyle="bold" />
 
-    <!-- 탄소배출량을 줄일 수 있는 대안으로 제시 -->
+    <!-- 친환경 대안 버튼 -->
     <Button
         android:id="@+id/buttonEcoAlternative"
         android:layout_width="match_parent"
