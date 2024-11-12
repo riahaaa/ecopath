@@ -42,7 +42,8 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0") // Material Components
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.firebase:firebase-database:21.0.0")
-    implementation("com.google.firebase:firebase-auth:23.0.0") // ConstraintLayout
+    implementation("com.google.firebase:firebase-auth:23.0.0")
+    implementation("com.google.firebase:firebase-firestore:25.1.1") // ConstraintLayout
 
     testImplementation("junit:junit:4.13.2") // JUnit 테스트 라이브러리
     androidTestImplementation("androidx.test.ext:junit:1.2.1") // AndroidX 테스트 라이브러리
@@ -57,5 +58,7 @@ dependencies {
     // Firebase Firestore
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation ("com.google.firebase:firebase-database-ktx:20.3.0")
+    // Firebase UI (옵션, Firestore RecyclerView용)
+    implementation ("com.firebaseui:firebase-ui-firestore:8.0.0")
 
 }

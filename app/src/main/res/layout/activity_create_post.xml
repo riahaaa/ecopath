@@ -1,0 +1,55 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+    <!-- 상단바 (뒤로 가기 버튼과 타이틀) -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageButton
+            android:id="@+id/backButton"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@drawable/ic_back"
+            android:contentDescription="뒤로 가기 버튼"
+            android:layout_alignParentStart="true"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:scaleType="centerInside"
+            android:padding="4dp" />
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ecoPATH"
+            android:textSize="20sp"
+            android:fontFamily="sans-serif-medium"
+            android:layout_centerHorizontal="true" />
+
+    </RelativeLayout>
+
+
+    <EditText
+        android:id="@+id/editTextTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="제목을 입력하세요" />
+
+    <EditText
+        android:id="@+id/editTextContent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="내용을 입력하세요"
+        android:gravity="top"
+        android:inputType="textMultiLine"
+        android:minHeight="200dp" />
+
+    <Button
+        android:id="@+id/buttonPost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="게시하기" />
+</LinearLayout>
