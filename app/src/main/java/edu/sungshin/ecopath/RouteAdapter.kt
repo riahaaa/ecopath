@@ -44,6 +44,9 @@ class RouteAdapter(
     private fun getTransportIcon(mode: String): Int {
         return when (mode.lowercase()) {
             "driving" -> R.drawable.ic_car
+            "walking" -> R.drawable.ic_walk
+            "bicycling" -> R.drawable.ic_bicycle
+            "transit" -> R.drawable.ic_bus
             else -> R.drawable.ic_default
         }
     }
