@@ -7,13 +7,16 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
-
+import com.google.firebase.firestore.ServerTimestamp
 data class Post(
     val id: String, // 게시글 ID 추가
     val username: String,
     val title: String,
-    val content: String
+    val content: String,
+    val imageUrl: String? = null,
+    @ServerTimestamp val timestamp: Timestamp? =null
 )
 
 class PostListActivity : AppCompatActivity() {
@@ -36,10 +39,12 @@ class PostListActivity : AppCompatActivity() {
         postAdapter = PostAdapter(postList)
         recyclerViewPosts.adapter = postAdapter
 
-        // Firestore에서 게시물 불러오기
+        // Firestore에서 게시물 불러오기(최신순 정렬)
         firestore.collection("posts")
+            .orderBy("timestamp" )
             .get()
             .addOnSuccessListener { documents ->
+                postList.clear() //중복방지
                 for (document in documents) {
                     val title = document.getString("title") ?: ""
                     val content = document.getString("content") ?: ""

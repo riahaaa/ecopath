@@ -44,6 +44,13 @@ dependencies {
     implementation("com.google.firebase:firebase-database:21.0.0")
     implementation("com.google.firebase:firebase-auth:23.0.0")
     implementation("com.google.firebase:firebase-firestore:25.1.1") // ConstraintLayout
+    implementation ("androidx.recyclerview:recyclerview:1.2.1") // 최신 버전을 사용
+    // Firebase Storage 라이브러리 추가
+    implementation ("com.google.firebase:firebase-storage:20.0.1") // 최신 버전으로 업데이트 가능
+    implementation ("com.github.bumptech.glide:glide:4.12.0") // 최신 버전으로 업데이트 가능
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.12.0")
+
+
 
     testImplementation("junit:junit:4.13.2") // JUnit 테스트 라이브러리
     androidTestImplementation("androidx.test.ext:junit:1.2.1") // AndroidX 테스트 라이브러리
