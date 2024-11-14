@@ -37,4 +37,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
     <!--recyclerview 추가해서 게시글이 동적으로 보이도록-->
+
+    <ImageView
+        android:id="@+id/imageViewPost"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:layout_marginTop="8dp" /> <!--게시글 이미지 클릭-->
+
 </LinearLayout>

@@ -56,6 +56,17 @@ class PostAdapter(private val postList: MutableList<Post>) :
                 .into(holder.imageViewPost)
         } ?: holder.imageViewPost.setImageResource(R.drawable.placeholder)
 
+        // 이미지를 클릭할 때 게시글 상세 화면으로 이동
+        holder.imageViewPost.setOnClickListener {
+            val context = it.context
+            val intent = Intent(context, PostDetailActivity::class.java)
+            intent.putExtra("postId", post.id) // 게시글 ID 전달
+            intent.putExtra("title", post.title) // 게시글 제목 전달
+            intent.putExtra("content", post.content) // 게시글 내용 전달
+            intent.putExtra("imageUrl", post.imageUrl) // 이미지 URL 전달
+            context.startActivity(intent)
+        }
+
 
 
         // 수정 버튼 클릭 리스너
