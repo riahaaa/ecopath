@@ -3,21 +3,18 @@ package edu.sungshin.ecopath
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
-
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-
 import okhttp3.OkHttpClient
 import okhttp3.Request
-
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,6 +31,7 @@ class CalculateActivity : AppCompatActivity() {
     private lateinit var buttonSearch: Button
     private lateinit var recyclerViewOriginResults: RecyclerView
     private lateinit var recyclerViewDestinationResults: RecyclerView
+    private lateinit var spinnerTransportMode: Spinner
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
     private lateinit var buttonEcoAlternative: Button
@@ -55,6 +53,7 @@ class CalculateActivity : AppCompatActivity() {
         buttonSearch = findViewById(R.id.buttonSearch)
         recyclerViewOriginResults = findViewById(R.id.recyclerViewOriginResults)
         recyclerViewDestinationResults = findViewById(R.id.recyclerViewDestinationResults)
+        spinnerTransportMode = findViewById(R.id.spinnerTransportMode)
         recyclerViewRoutes = findViewById(R.id.recyclerViewRoutes)
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
         buttonEcoAlternative = findViewById(R.id.buttonEcoAlternative)
@@ -69,8 +68,14 @@ class CalculateActivity : AppCompatActivity() {
         recyclerViewRoutes.layoutManager = LinearLayoutManager(this)
         recyclerViewRoutes.setHasFixedSize(true)
 
+        // Spinner
+        val transportModes = arrayOf("자동차", "대중교통", "전기차", "하이브리드")
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, transportModes)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spinnerTransportMode.adapter = adapter
+
         // 출발지와 목적지 검색 UI 설정
-        setupSearchButton(buttonOriginSearch) { query ->
+        setupSearchButton(buttonOriginSearch, editTextOrigin) { query ->
             if (query.isNotEmpty()) {
                 searchPlaceWithKakao(query, isOrigin = true) { latLng ->
                     originLatLng = latLng
@@ -78,7 +83,8 @@ class CalculateActivity : AppCompatActivity() {
                 }
             }
         }
-        setupSearchButton(buttonDestinationSearch) { query ->
+
+        setupSearchButton(buttonDestinationSearch, editTextDestination) { query ->
             if (query.isNotEmpty()) {
                 searchPlaceWithKakao(query, isOrigin = false) { latLng ->
                     destinationLatLng = latLng
@@ -94,7 +100,8 @@ class CalculateActivity : AppCompatActivity() {
             } else if (destinationLatLng == null) {
                 Toast.makeText(this, "목적지를 선택해주세요.", Toast.LENGTH_SHORT).show()
             } else {
-                fetchRoutesFromAPI()
+                val selectedTransportMode = spinnerTransportMode.selectedItem.toString()  // 선택된 이동수단
+                fetchRoutesFromAPI(selectedTransportMode)
             }
         }
 
@@ -104,6 +111,7 @@ class CalculateActivity : AppCompatActivity() {
         }
     }
 
+    // 장소 검색 함수
     private fun searchPlaceWithKakao(query: String, isOrigin: Boolean, callback: (Pair<Double, Double>?) -> Unit) {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
         val kakaoApiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query=$encodedQuery"
@@ -120,17 +128,25 @@ class CalculateActivity : AppCompatActivity() {
                     if (response.isSuccessful && responseData != null) {
                         val json = JSONObject(responseData)
                         val documents = json.getJSONArray("documents")
-                        if (documents.length() > 0) {
-                            val place = documents.getJSONObject(0)
+                        val places = mutableListOf<Place>()
+
+                        for (idx in 0 until documents.length()) {
+                            val place = documents.getJSONObject(idx)
+                            val name = place.getString("place_name")
+                            val address = place.getString("address_name")
                             val lat = place.getDouble("y")
                             val lng = place.getDouble("x")
-                            val latLng = Pair(lat, lng)
-                            withContext(Dispatchers.Main) {
-                                callback(latLng)
-                            }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                callback(null)
+                            places.add(Place(name, address, lat, lng))
+                        }
+
+                        withContext(Dispatchers.Main) {
+                            if (places.isNotEmpty()) {
+                                setupRecyclerView(
+                                    if (isOrigin) recyclerViewOriginResults else recyclerViewDestinationResults,
+                                    places,
+                                    isOrigin
+                                )
+                            } else {
                                 Toast.makeText(this@CalculateActivity, "검색 결과가 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
@@ -142,25 +158,47 @@ class CalculateActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupSearchButton(editText: EditText, searchCallback: (String) -> Unit) {
-        editText.setOnEditorActionListener { v, actionId, event ->
-            val query = v.text.toString().trim()
+    // RecyclerView 설정 함수
+    private fun setupRecyclerView(recyclerView: RecyclerView, places: List<Place>, isOrigin: Boolean) {
+        val adapter = PlaceAdapter(places) { selectedPlace ->
+            val latLng = Pair(selectedPlace.lat, selectedPlace.lng)
+            if (isOrigin) {
+                originLatLng = latLng
+                editTextOrigin.setText(selectedPlace.name)
+            } else {
+                destinationLatLng = latLng
+                editTextDestination.setText(selectedPlace.name)
+            }
+        }
+        recyclerView.adapter = adapter
+    }
+
+    // 검색 버튼 클릭 리스너 설정
+    private fun setupSearchButton(button: Button, editText: EditText, searchCallback: (String) -> Unit) {
+        button.setOnClickListener {
+            val query = editText.text.toString().trim()
             if (query.isNotEmpty()) {
-                searchCallback(query)
+                searchCallback(query)  // 입력된 검색어로 콜백 실행
             } else {
                 Toast.makeText(this, "검색어를 입력해주세요.", Toast.LENGTH_SHORT).show()
             }
-            true
         }
     }
 
-    private fun fetchRoutesFromAPI() {
+    // 경로를 가져오는 API 호출 함수
+    private fun fetchRoutesFromAPI(selectedTransportMode: String) {
         val originLatLng = this.originLatLng
         val destinationLatLng = this.destinationLatLng
 
-
         if (originLatLng != null && destinationLatLng != null) {
-            val url = "https://apis-navi.kakaomobility.com/v1/directions?origin=${originLatLng.second},${originLatLng.first}&destination=${destinationLatLng.second},${destinationLatLng.first}&priority=RECOMMEND"
+            val travelMode = when (selectedTransportMode) {
+                "대중교통" -> "transit"
+                "전기차" -> "electric driving"
+                "하이브리드" -> "hybrid driving"
+                else -> "driving"  // 기본적으로 자동차
+            }
+
+            val url = "https://apis-navi.kakaomobility.com/v1/directions?origin=${originLatLng.second},${originLatLng.first}&destination=${destinationLatLng.second},${destinationLatLng.first}&priority=RECOMMEND&mode=$travelMode"
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url(url)
@@ -194,6 +232,7 @@ class CalculateActivity : AppCompatActivity() {
         }
     }
 
+    // 경로 응답 파싱 함수
     private fun parseDirectionsApiResponse(response: String): List<Route> {
         val routeList = mutableListOf<Route>()
         val jsonObject = JSONObject(response)
@@ -202,9 +241,10 @@ class CalculateActivity : AppCompatActivity() {
         for (i in 0 until routes.length()) {
             val route = routes.getJSONObject(i)
             val summary = route.getJSONObject("summary")
-            val distance = summary.getJSONObject("distance").getString("text")
-            val duration = summary.getJSONObject("duration").getString("text")
-            val travelMode = "driving" // 기본 설정
+
+            val distance = summary.getString("distance")  // distance는 직접 String으로 받기
+            val duration = summary.getString("duration")
+            val travelMode = route.getString("mode")
 
             routeList.add(
                 Route(
@@ -218,6 +258,7 @@ class CalculateActivity : AppCompatActivity() {
         return routeList
     }
 
+    // 선택된 경로와 탄소 배출량 표시
     private fun showSelectedRouteAndCarbonEmission(route: Route) {
         val carbonEmission = calculateCarbonEmission(route.distance, route.travelMode)
         textViewCarbonEmission.text = "탄소 배출량: ${String.format("%.2f", carbonEmission)} kg"
@@ -232,6 +273,7 @@ class CalculateActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    // 친환경 대안 보기
     private fun calculateCarbonEmission(distanceText: String, travelMode: String): Double {
         val distanceInKm = try {
             distanceText.split(" ")[0].replace(",", "").toDouble()
