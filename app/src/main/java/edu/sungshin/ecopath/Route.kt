@@ -5,5 +5,5 @@ data class Route(
     val info: String,      // 경로 정보
     val distance: String,  // 거리
     val duration: String,  // 소요 시간
-    val travelMode: String // 교통 수단
+    val travelMode: String, // 교통 수단
 )

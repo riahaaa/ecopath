@@ -6,19 +6,94 @@
     android:orientation="vertical"
     android:padding="16dp">
 
-    <!-- 출발지 Autocomplete Fragment -->
-    <fragment
-        android:id="@+id/fragment_autocomplete_origin"
-        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+    <!-- 출발지 레이블과 EditText -->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="- 출발지"
+        android:layout_marginBottom="5dp" />
 
-    <!-- 목적지 Autocomplete Fragment -->
-    <fragment
-        android:id="@+id/fragment_autocomplete_destination"
-        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/editTextOrigin"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:hint="출발지 입력"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+
+        <Button
+            android:id="@+id/OriginSearchButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/green"
+            android:text="검색" />
+    </LinearLayout>
+
+    <!-- 출발지 검색 결과 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewOriginResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
+
+
+    <!-- 목적지 레이블과 EditText -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="- 목적지"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="5dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+        <EditText
+            android:id="@+id/editTextDestination"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:hint="목적지 입력"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+        <Button
+            android:id="@+id/DestinationSearchButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:backgroundTint="@color/green"
+            android:text="검색" />
+    </LinearLayout>
+
+    <!-- 목적지 검색 결과 RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewDestinationResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="vertical" />
+
+    <!-- 이동수단 선택 Spinner -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="- 이동수단 선택"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <Spinner
+        android:id="@+id/spinnerTransportMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp" />
 
     <!-- 경로 검색 버튼 -->
     <Button
@@ -27,14 +102,14 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:backgroundTint="@color/green"
-        android:text="검색" />
+        android:text="경로 탐색" />
 
     <!-- 경로 목록 RecyclerView -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
-        android:text="경로 목록"
+        android:text="<경로 목록>"
         android:textStyle="bold" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -51,7 +126,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:text="탄소 배출량:"
-        android:textSize="18dp"
+        android:textSize="18sp"
         android:textStyle="bold" />
 
     <!-- 친환경 대안 버튼 -->
@@ -59,6 +134,7 @@
         android:id="@+id/buttonEcoAlternative"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
         android:backgroundTint="@color/green"
         android:text="탄소배출량을 줄일 수 있는 친환경 대안 알아보기" />
 

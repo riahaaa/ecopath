@@ -11,8 +11,9 @@ val localProperties = Properties().apply {
     load(rootProject.file("local.properties").inputStream())
 }
 
-// MAPS_API_KEY 값을 가져오기
-val mapsApiKey: String = localProperties.getProperty("MAPS_API_KEY") ?: ""
+// KAKAO_API_KEY 값을 가져오기
+val KakaoApiKey: String = localProperties.getProperty("KAKAO_API_KEY") ?: ""
+
 
 android {
     namespace = "edu.sungshin.ecopath"
@@ -27,7 +28,8 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "MAPS_API_KEY", "\"${mapsApiKey}\"")
+        // BuildConfig에 API 키 추가
+        buildConfigField("String", "KAKAO_API_KEY", "\"${KakaoApiKey}\"")
     }
 
     buildFeatures {
@@ -65,9 +67,8 @@ dependencies {
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.firebase:firebase-database-ktx")
 
-    // Google Play Services
-    implementation("com.google.android.gms:play-services-maps:18.0.0")
-    implementation("com.google.android.libraries.places:places:4.0.0")
+    // Kakao Services
+    implementation ("com.squareup.okhttp3:okhttp:4.9.1")
 
     // 테스트 관련
     testImplementation("junit:junit:4.13.2")

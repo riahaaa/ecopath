@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">ecopath</string>
-
+    <string-array name="transport_modes">
+        <item>자동차</item>
+        <item>대중교통</item>
+    </string-array>
 </resources>
