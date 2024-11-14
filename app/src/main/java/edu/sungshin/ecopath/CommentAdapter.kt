@@ -28,10 +28,10 @@ class CommentAdapter(private val commentList: MutableList<Comment>) :
     override fun onBindViewHolder(holder: CommentViewHolder, position: Int) {
         val comment = commentList[position]
         //uid 로그를 추가
-        Log.d("CommentAdapter","Author ID: ${comment.authorId}")
+        Log.d("CommentAdapter","Author ID: ${comment.username}")
 
         // 작성자 ID (UID) 표시
-        holder.textViewCommentAuthor.text = comment.authorId
+        holder.textViewCommentAuthor.text = comment.username
         holder.textViewCommentContent.text = comment.content
 
         // 작성 시간 표시

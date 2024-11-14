@@ -82,12 +82,23 @@ class PostDetailActivity : AppCompatActivity() {
         buttonSubmitComment.setOnClickListener {
             val commentContent = editTextComment.text.toString().trim()
             val authorId = auth.currentUser?.uid ?: "알 수 없음"
+            val uid = auth.currentUser?.uid
+            var username = "알 수 없음" // 기본값 설정
 
-            Log.d("PostDetailActivity", "Auth UID: $authorId") // UID 로그 추가
+            uid?.let {
+                firestore.collection("users").document(it).get()
+                    .addOnSuccessListener { document ->
+                        username = document.getString("username") ?: "알 수 없음"
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "사용자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
+            }
+
 
             if (commentContent.isNotEmpty()) {
                 val newComment = hashMapOf(
-                    "authorId" to authorId,
+                    "username" to username, // 작성자 이름 추가
                     "content" to commentContent,
                     "timestamp" to Timestamp.now()
                 )
@@ -103,6 +114,7 @@ class PostDetailActivity : AppCompatActivity() {
                     }
             }
         }
+
     }
     // 공감 수 증가
     private fun increaseLikeCount(postId: String) {

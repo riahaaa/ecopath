@@ -1,7 +1,11 @@
 package edu.sungshin.ecopath
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.view.MotionEvent
+import android.view.GestureDetector
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -107,6 +111,24 @@ class PostListActivity : AppCompatActivity() {
             // 예: 메뉴 버튼 클릭 시 메뉴 열기 (추후 기능 구현)
             Toast.makeText(this, "메뉴 버튼 클릭됨", Toast.LENGTH_SHORT).show()
         }
+
+        // 아이템 클릭 리스너 추가
+        recyclerViewPosts.addOnItemTouchListener(
+            RecyclerItemClickListener(this, recyclerViewPosts, object : RecyclerItemClickListener.OnItemClickListener {
+                override fun onItemClick(view: View, position: Int) {
+                    val post = postList[position]
+                    val intent = Intent(this@PostListActivity, PostDetailActivity::class.java)
+                    intent.putExtra("postId", post.id) // 게시물 ID
+                    intent.putExtra("username", post.username) // 작성자 이름 (username)
+                    intent.putExtra("title", post.title) // 제목
+                    intent.putExtra("content", post.content) // 내용
+                    intent.putExtra("imageUrl", post.imageUrl) // 이미지 URL (선택 사항)
+                    startActivity(intent)
+                }
+            })
+        )
+
+
     }
 
     // Firestore에서 게시물 불러오기 함수
@@ -122,6 +144,7 @@ class PostListActivity : AppCompatActivity() {
                     val postId = document.id
                     val imageUrl = document.getString("imageUrl")
                     val timestamp = document.getTimestamp("timestamp")
+                    val username = document.getString("username") ?: "알 수 없음" // username 추가
 
                     // Firestore에서 데이터를 가져오면서 Post 객체 생성 (작성자 ID로 userId 사용)
                     postList.add(Post(postId, userId, title, content, imageUrl, timestamp))
@@ -151,4 +174,33 @@ class PostListActivity : AppCompatActivity() {
                 }
         }
     }
+}
+
+// RecyclerItemClickListener 추가
+open class RecyclerItemClickListener(
+    context: Context,
+    recyclerView: RecyclerView,
+    private val listener: OnItemClickListener
+) : RecyclerView.OnItemTouchListener {
+
+    interface OnItemClickListener {
+        fun onItemClick(view: View, position: Int)
+    }
+
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapUp(e: MotionEvent): Boolean {
+            return true
+        }
+    })
+
+    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
+        val childView = rv.findChildViewUnder(e.x, e.y)
+        if (childView != null && gestureDetector.onTouchEvent(e)) {
+            listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
+        }
+        return false
+    }
+
+    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
+    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
 }
