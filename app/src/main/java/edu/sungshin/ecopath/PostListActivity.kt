@@ -3,6 +3,7 @@ package edu.sungshin.ecopath
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageButton
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -12,7 +13,6 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
-import com.google.firebase.firestore.Source
 
 data class Post(
     val id: String, // 게시글 ID
@@ -31,14 +31,21 @@ class PostListActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference // Realtime Database 참조
     private lateinit var buttonCreatePost: ImageButton
+    private lateinit var backButton: ImageButton
+    private lateinit var imageButton: ImageButton
+    private lateinit var titleText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_post_list)
 
+        // 뷰 초기화
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts)
         recyclerViewPosts.layoutManager = LinearLayoutManager(this)
         buttonCreatePost = findViewById(R.id.buttonCreatePost)
+        backButton = findViewById(R.id.backButton)
+        imageButton = findViewById(R.id.imageButton)
+        titleText = findViewById(R.id.titleText)
 
         // 게시물 리스트 초기화
         val postList = mutableListOf<Post>()
@@ -53,7 +60,6 @@ class PostListActivity : AppCompatActivity() {
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
                     val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
-
                     // Firestore에서 게시물 불러오기 (최신순 정렬)
                     loadPosts(userId, postList)
                 }
@@ -68,6 +74,17 @@ class PostListActivity : AppCompatActivity() {
         buttonCreatePost.setOnClickListener {
             val intent = Intent(this, CreatePostActivity::class.java)
             startActivity(intent)
+        }
+
+        // 뒤로 가기 버튼 클릭 리스너
+        backButton.setOnClickListener {
+            finish()  // 현재 Activity 종료, 이전 화면으로 돌아감
+        }
+
+        // 메뉴 버튼 클릭 리스너
+        imageButton.setOnClickListener {
+            // 예: 메뉴 버튼 클릭 시 메뉴 열기 (추후 기능 구현)
+            Toast.makeText(this, "메뉴 버튼 클릭됨", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -96,6 +113,7 @@ class PostListActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
+
     override fun onResume() {
         super.onResume()
         // 화면으로 돌아올 때마다 게시물 목록을 새로 불러오기
@@ -113,4 +131,3 @@ class PostListActivity : AppCompatActivity() {
         }
     }
 }
-
