@@ -12,6 +12,7 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.firestore.Source
 
 data class Post(
     val id: String, // 게시글 ID
@@ -95,4 +96,21 @@ class PostListActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
+    override fun onResume() {
+        super.onResume()
+        // 화면으로 돌아올 때마다 게시물 목록을 새로 불러오기
+        val uid = auth.currentUser?.uid
+        if (uid != null) {
+            database.child("ecopath").child("UserAccount").child(uid).child("id")
+                .get()
+                .addOnSuccessListener { dataSnapshot ->
+                    val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
+                    loadPosts(userId, postAdapter.getPostList()) // 최신 게시물 목록으로 갱신
+                }
+                .addOnFailureListener {
+                    Toast.makeText(this, "사용자 ID를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                }
+        }
+    }
 }
+

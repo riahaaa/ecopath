@@ -5,6 +5,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 
 class EditPostActivity : AppCompatActivity() {
@@ -25,6 +26,8 @@ class EditPostActivity : AppCompatActivity() {
         postContent = findViewById(R.id.editTextContent)
         buttonSave = findViewById(R.id.buttonSave)
 
+
+
         // 기존 게시글 로드
         firestore.collection("posts").document(postId)
             .get()
@@ -41,8 +44,10 @@ class EditPostActivity : AppCompatActivity() {
 
             val updatedPost = hashMapOf<String, Any>(
                 "title" to newTitle,
-                "content" to newContent
+                "content" to newContent,
+                "timestamp" to Timestamp.now() //수정시간으로 업데이트함
             )
+
 
 
             firestore.collection("posts").document(postId)

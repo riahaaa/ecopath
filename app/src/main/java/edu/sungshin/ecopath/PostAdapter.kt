@@ -17,6 +17,10 @@ import android.widget.ImageView
 class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
         private val dateFormat=SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())//시간표시
+
+    fun getPostList(): MutableList<Post>{
+        return postList
+    }
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textViewAuthor: TextView = itemView.findViewById(R.id.textViewAuthor)
         val textViewTitle: TextView = itemView.findViewById(R.id.textViewTitle)
