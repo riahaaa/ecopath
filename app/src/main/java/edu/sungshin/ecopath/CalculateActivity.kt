@@ -244,7 +244,11 @@ class CalculateActivity : AppCompatActivity() {
 
             val distance = summary.getString("distance")  // distance는 직접 String으로 받기
             val duration = summary.getString("duration")
-            val travelMode = route.getString("mode")
+            val travelMode = if (route.has("mode")) {
+                route.getString("mode")
+            } else {
+                "driving"  // 기본값을 "driving" (자동차)로 설정
+            }
 
             routeList.add(
                 Route(
