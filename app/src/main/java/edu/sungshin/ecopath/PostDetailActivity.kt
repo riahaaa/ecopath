@@ -22,6 +22,8 @@ class PostDetailActivity : AppCompatActivity() {
     private lateinit var textViewContent: TextView
     private lateinit var imageViewPost: ImageView // 이미지 뷰를 추가
     private lateinit var recyclerViewComments: RecyclerView
+    private lateinit var textViewLikes: TextView // 공감 수 TextView
+    private lateinit var buttonLike: Button // 공감 버튼
     private lateinit var editTextComment: EditText
     private lateinit var buttonSubmitComment: Button
     private val firestore = FirebaseFirestore.getInstance()
@@ -40,6 +42,8 @@ class PostDetailActivity : AppCompatActivity() {
         recyclerViewComments = findViewById(R.id.recyclerViewComments)
         editTextComment = findViewById(R.id.editTextComment)
         buttonSubmitComment = findViewById(R.id.buttonSubmitComment)
+        textViewLikes = findViewById(R.id.textViewLikes)
+        buttonLike = findViewById(R.id.buttonLike)
 
         // Intent로 전달된 게시글 데이터 받기
         val postId = intent.getStringExtra("postId") ?: ""
@@ -64,9 +68,15 @@ class PostDetailActivity : AppCompatActivity() {
         commentAdapter = CommentAdapter(commentList)
         recyclerViewComments.layoutManager = LinearLayoutManager(this)
         recyclerViewComments.adapter = commentAdapter
+        //공감수 댓글수 가져오기
+        loadPostData(postId)
 
         // 댓글 불러오기
         loadComments(postId)
+        //공감버튼 클릭 리스너
+        buttonLike.setOnClickListener{
+            increaseLikeCount(postId)
+        }
 
         // 댓글 작성 버튼 클릭 리스너
         buttonSubmitComment.setOnClickListener {
@@ -94,6 +104,45 @@ class PostDetailActivity : AppCompatActivity() {
             }
         }
     }
+    // 공감 수 증가
+    private fun increaseLikeCount(postId: String) {
+        val postRef = firestore.collection("posts").document(postId)
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+            val currentLikes = snapshot.getLong("likes") ?: 0
+            transaction.update(postRef, "likes", currentLikes + 1)
+        }.addOnSuccessListener {
+            loadPostData(postId) // 공감 수를 다시 로드하여 갱신
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "공감 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 댓글 개수 업데이트
+    private fun updateCommentCount(postId: String) {
+        val postRef = firestore.collection("posts").document(postId)
+        firestore.runTransaction { transaction ->
+            val snapshot = transaction.get(postRef)
+            val currentCommentCount = snapshot.getLong("commentCount") ?: 0
+            transaction.update(postRef, "commentCount", currentCommentCount + 1)
+        }.addOnFailureListener { e ->
+            Toast.makeText(this, "댓글 수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    // 게시글 데이터(공감 수와 댓글 수) 불러오기
+    private fun loadPostData(postId: String) {
+        firestore.collection("posts").document(postId)
+            .get()
+            .addOnSuccessListener { document ->
+                if (document != null && document.exists()) {
+                    val likes = document.getLong("likes") ?: 0
+                    val commentCount = document.getLong("commentCount") ?: 0
+                    textViewLikes.text = "공감 $likes"
+                }
+            }
+    }
+
 
     // Firestore에서 댓글 불러오기
     private fun loadComments(postId: String) {

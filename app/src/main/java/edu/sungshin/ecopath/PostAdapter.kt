@@ -26,6 +26,8 @@ class PostAdapter(private val postList: MutableList<Post>) :
         val textViewTitle: TextView = itemView.findViewById(R.id.textViewTitle)
         val textViewSnippet: TextView = itemView.findViewById(R.id.textViewSnippet)
         val textViewTimestamp: TextView = itemView.findViewById(R.id.textViewTimestamp)
+        val textViewLikes: TextView = itemView.findViewById(R.id.textViewLikes) // 공감 수
+        val textViewCommentCount: TextView = itemView.findViewById(R.id.textViewCommentCount) // 댓글 수
         val buttonEdit: ImageButton = itemView.findViewById(R.id.buttonEdit) // 수정 버튼
         val buttonDelete: ImageButton = itemView.findViewById(R.id.buttonDelete) // 삭제 버튼
         val imageViewPost: ImageView = itemView.findViewById(R.id.imageViewPost)
@@ -48,6 +50,10 @@ class PostAdapter(private val postList: MutableList<Post>) :
         } ?: run {
             holder.textViewTimestamp.text = "시간 정보 없음"
         }
+
+        // 공감 수와 댓글 수 설정
+        holder.textViewLikes.text = "공감 ${post.likes}"
+        holder.textViewCommentCount.text = "댓글 ${post.commentCount}"
 
         //firestore에서 가져온 이미지 url있으면 glide로 이미지 로드
         post.imageUrl?.let {

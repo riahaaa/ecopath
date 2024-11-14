@@ -15,12 +15,14 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
 data class Post(
-    val id: String, // 게시글 ID
-    val username: String, // 게시글 작성자 ID를 저장할 필드
-    val title: String,
-    val content: String,
+    val id: String="", // 게시글 ID
+    val username: String="", // 게시글 작성자 ID를 저장할 필드
+    val title: String="",
+    val content: String="",
     val imageUrl: String? = null,
-    val timestamp: Timestamp? = null
+    val timestamp: Timestamp? = null,
+    val likes: Int = 0,  // 공감 수
+    val commentCount: Int = 0  // 댓글 수
 )
 
 class PostListActivity : AppCompatActivity() {
@@ -51,6 +53,25 @@ class PostListActivity : AppCompatActivity() {
         val postList = mutableListOf<Post>()
         postAdapter = PostAdapter(postList)
         recyclerViewPosts.adapter = postAdapter
+
+        // 실시간 리스너로 데이터 변화 감지
+        firestore.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
+
+                postList.clear()
+                for (document in snapshots!!.documents) {
+                    val post = document.toObject(Post::class.java)
+                    if (post != null) {
+                        postList.add(post)
+                    }
+                }
+                postAdapter.notifyDataSetChanged() // 데이터 변경사항을 어댑터에 반영
+            }
 
         // 현재 로그인된 사용자의 uid 가져오기
         val uid = auth.currentUser?.uid
