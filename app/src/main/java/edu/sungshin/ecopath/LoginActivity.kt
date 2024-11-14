@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -82,7 +83,11 @@ class LoginActivity : AppCompatActivity() {
                                 Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show()
                             }
                             .addOnFailureListener { e ->
-                                Toast.makeText(this, "사용자 정보 저장 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this,
+                                    "사용자 정보 저장 실패: ${e.message}",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                     }
 
@@ -99,4 +104,6 @@ class LoginActivity : AppCompatActivity() {
                     ).show()
                 }
             }
-}}
+
+    }
+}
