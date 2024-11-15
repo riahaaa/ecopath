@@ -14,6 +14,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.database.FirebaseDatabase
 
 class CreatePostActivity : AppCompatActivity() {
 
@@ -93,25 +94,44 @@ class CreatePostActivity : AppCompatActivity() {
             }
     }
 
-    // Firestore에 게시글 저장
     private fun savePostToFirestore(title: String, content: String, username: String, imageUrl: String?) {
-        val post = hashMapOf(
-            "title" to title,
-            "content" to content,
-            "username" to username,
-            "imageUrl" to imageUrl, // 이미지 URL 추가
-            "timestamp" to Timestamp.now()
-        )
+        val uid = auth.currentUser?.uid
+        if (uid == null) {
+            Toast.makeText(this, "사용자가 로그인되지 않았습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        firestore.collection("posts")
-            .add(post)
-            .addOnSuccessListener {
-                Toast.makeText(this, "게시물이 성공적으로 업로드되었습니다.", Toast.LENGTH_SHORT).show()
-                finish() // 작성 완료 후 액티비티 종료
-            }
-            .addOnFailureListener { e ->
-                Toast.makeText(this, "업로드에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+// Realtime Database에서 사용자 ID 가져오기
+        val databaseRef = FirebaseDatabase.getInstance().getReference("UserAccount").child(uid)
+        databaseRef.get().addOnSuccessListener { snapshot ->
+            val username = snapshot.child("id").value as? String ?: "익명 사용자" // UserAccount에서 id 가져오기
+
+            // 이후 게시글 저장 로직
+            val postId = System.currentTimeMillis().toString() // 고유 ID 생성
+            val post = hashMapOf(
+                "postId" to postId,
+                "title" to title,
+                "content" to content,
+                "username" to username,
+                "imageUrl" to imageUrl,
+                "timestamp" to Timestamp.now()
+            )
+
+            firestore.collection("posts")
+                .document(postId)
+                .set(post)
+                .addOnSuccessListener {
+                    Toast.makeText(this, "게시물이 성공적으로 업로드되었습니다.", Toast.LENGTH_SHORT).show()
+                    finish() // 작성 완료 후 액티비티 종료
+                }
+                .addOnFailureListener { e ->
+                    Toast.makeText(this, "업로드에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
+        }
+
     }
+
+
+
 }
 

@@ -1,5 +1,6 @@
 package edu.sungshin.ecopath
 
+import edu.sungshin.ecopath.R
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -8,19 +9,21 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.bumptech.glide.Glide
 import android.widget.ImageView
 
 class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
-        private val dateFormat=SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())//시간표시
 
-    fun getPostList(): MutableList<Post>{
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
+
+    fun getPostList(): MutableList<Post> {
         return postList
     }
+
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textViewAuthor: TextView = itemView.findViewById(R.id.textViewAuthor)
         val textViewTitle: TextView = itemView.findViewById(R.id.textViewTitle)
@@ -40,7 +43,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
-        holder.textViewAuthor.text = post.username //작성자 이름 상단에 표시
+        holder.textViewAuthor.text = post.username // 작성자 이름 표시
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
 
@@ -55,7 +58,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.textViewLikes.text = "공감 ${post.likes}"
         holder.textViewCommentCount.text = "댓글 ${post.commentCount}"
 
-        //firestore에서 가져온 이미지 url있으면 glide로 이미지 로드
+        // Firestore에서 가져온 이미지 URL 있으면 Glide로 이미지 로드
         post.imageUrl?.let {
             Glide.with(holder.itemView.context)
                 .load(it)
@@ -66,42 +69,37 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.imageViewPost.setOnClickListener {
             val context = it.context
             val intent = Intent(context, PostDetailActivity::class.java)
-            intent.putExtra("postId", post.id) // 게시글 ID 전달
+            intent.putExtra("postId", post.postid) // 게시글 ID 전달
             intent.putExtra("title", post.title) // 게시글 제목 전달
             intent.putExtra("content", post.content) // 게시글 내용 전달
             intent.putExtra("imageUrl", post.imageUrl) // 이미지 URL 전달
             context.startActivity(intent)
         }
 
-
-
         // 수정 버튼 클릭 리스너
         holder.buttonEdit.setOnClickListener {
             val context = it.context
             val intent = Intent(context, EditPostActivity::class.java)
-            intent.putExtra("postId", post.id) // 게시글 ID를 넘겨줘야 수정이 가능
+            intent.putExtra("postId", post.postid) // 게시글 ID를 넘겨줘야 수정이 가능
             context.startActivity(intent)
         }
 
         // 삭제 버튼 클릭 리스너
         holder.buttonDelete.setOnClickListener {
-            val context = it.context
-            // Firestore에서 해당 게시글 삭제
-            FirebaseFirestore.getInstance()
-                .collection("posts")
-                .document(post.id)  // post.id는 각 게시글의 고유 ID
-                .delete()
+            val db = FirebaseFirestore.getInstance()
+            db.collection("posts").document(post.postid).delete()
                 .addOnSuccessListener {
-                    // 삭제 후 postList에서 해당 게시글 제거하고 RecyclerView 갱신
+                    Toast.makeText(holder.itemView.context, "게시물이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                     postList.removeAt(position)
-                    notifyItemRemoved(position)
-                    Toast.makeText(context, "게시글이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+                    notifyItemRemoved(position) // 데이터 삭제 후 화면 갱신
                 }
-                .addOnFailureListener { e ->
-                    Toast.makeText(context, "게시글 삭제 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                .addOnFailureListener {
+                    Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
                 }
         }
     }
 
-    override fun getItemCount(): Int = postList.size
+    override fun getItemCount(): Int {
+        return postList.size
+    }
 }

@@ -71,39 +71,21 @@ class LoginActivity : AppCompatActivity() {
                     val uid = user?.uid
 
                     if (uid != null) {
-                        // Realtime Database에 사용자 UID 저장
-                        val database = FirebaseDatabase.getInstance().reference
-                        val userMap = mapOf(
-                            "id" to uid, // UID를 저장
-                            "email" to email
-                        )
 
-                        database.child("UserAccount").child(uid).setValue(userMap)
-                            .addOnSuccessListener {
-                                Toast.makeText(this, "사용자 정보 저장 완료", Toast.LENGTH_SHORT).show()
-                            }
-                            .addOnFailureListener { e ->
-                                Toast.makeText(
-                                    this,
-                                    "사용자 정보 저장 실패: ${e.message}",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+                        // 홈 화면으로 이동
+                        val intent = Intent(this, HomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // 로그인 실패
+                        Toast.makeText(
+                            this,
+                            "로그인 실패: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
-
-                    // 홈 화면으로 이동
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // 로그인 실패
-                    Toast.makeText(
-                        this,
-                        "로그인 실패: ${task.exception?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
                 }
-            }
 
+            }
     }
 }

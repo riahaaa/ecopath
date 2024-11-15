@@ -19,10 +19,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
 data class Post(
-    val id: String="", // 게시글 ID
-    val username: String="", // 게시글 작성자 ID를 저장할 필드
-    val title: String="",
-    val content: String="",
+    val postid: String = "", // 게시글 고유 ID
+    val username: String = "", // 게시글 작성자 ID를 저장할 필드
+    val title: String = "",
+    val content: String = "",
     val imageUrl: String? = null,
     val timestamp: Timestamp? = null,
     val likes: Int = 0,  // 공감 수
@@ -78,7 +78,6 @@ class PostListActivity : AppCompatActivity() {
                 }
             }
 
-
         // 현재 로그인된 사용자의 uid 가져오기
         val uid = auth.currentUser?.uid
         if (uid != null) {
@@ -86,12 +85,12 @@ class PostListActivity : AppCompatActivity() {
             database.child("ecopath").child("UserAccount").child(uid).child("id")
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
-                    val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
+                    val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
                     // Firestore에서 게시물 불러오기 (최신순 정렬)
-                    loadPosts(userId, postList)
+                    loadPosts(username, postList)
                 }
                 .addOnFailureListener {
-                    Toast.makeText(this, "사용자 ID를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "사용자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
@@ -119,63 +118,62 @@ class PostListActivity : AppCompatActivity() {
             RecyclerItemClickListener(this, recyclerViewPosts, object : RecyclerItemClickListener.OnItemClickListener {
                 override fun onItemClick(view: View, position: Int) {
                     val post = postList[position]
+                    val postId = post.postid  // post 객체에서 postId를 가져옴
                     val intent = Intent(this@PostListActivity, PostDetailActivity::class.java)
-                    intent.putExtra("postId", post.id) // 게시물 ID
                     intent.putExtra("username", post.username) // 작성자 이름 (username)
                     intent.putExtra("title", post.title) // 제목
                     intent.putExtra("content", post.content) // 내용
                     intent.putExtra("imageUrl", post.imageUrl) // 이미지 URL (선택 사항)
+                    intent.putExtra("postId", postId)  // postId를 전달
                     startActivity(intent)
                 }
             })
         )
-
-
     }
 
     // Firestore에서 게시물 불러오기 함수
-    private fun loadPosts(userId: String, postList: MutableList<Post>) {
+    private fun loadPosts(username: String, postList: MutableList<Post>) {
         firestore.collection("posts")
             .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
             .addOnSuccessListener { documents ->
                 postList.clear() // 중복 방지
                 for (document in documents) {
+                    val postid = document.id  // Firestore 문서의 ID를 postid로 사용
                     val title = document.getString("title") ?: ""
                     val content = document.getString("content") ?: ""
-                    val postId = document.id
                     val imageUrl = document.getString("imageUrl")
                     val timestamp = document.getTimestamp("timestamp")
-                    val username = document.getString("username") ?: "알 수 없음" // username 추가
+                    val postUsername = document.getString("username") ?: "알 수 없음" // username 추가
                     val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
                     val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
 
-                    // Firestore에서 데이터를 가져오면서 Post 객체 생성 (작성자 ID로 userId 사용)
-                    postList.add(Post(postId, userId, title, content, imageUrl, timestamp, likes, commentCount))
+                    // Firestore에서 데이터를 가져오면서 Post 객체 생성
+                    postList.add(Post(postid, postUsername, title, content, imageUrl, timestamp, likes, commentCount))
                 }
 
-                // 데이터가 변경되었음을 알리고 RecyclerView 갱신
+// 데이터가 변경되었음을 알리고 RecyclerView 갱신
                 postAdapter.notifyDataSetChanged()
+
             }
             .addOnFailureListener {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
 
-
     override fun onResume() {
         super.onResume()
         // 화면으로 돌아올 때마다 게시물 목록을 새로 불러오기
         val uid = auth.currentUser?.uid
         if (uid != null) {
-            database.child("ecopath").child("UserAccount").child(uid).child("id")
+            database.child("ecopath").child("UserAccount").child(uid).child("username")
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
-                    val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
-                    loadPosts(userId, postAdapter.getPostList()) // 최신 게시물 목록으로 갱신
+                    val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
+                    loadPosts(username, postAdapter.getPostList()) // 최신 게시물 목록으로 갱신
                 }
                 .addOnFailureListener {
-                    Toast.makeText(this, "사용자 ID를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "사용자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                 }
         }
     }
