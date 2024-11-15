@@ -6,10 +6,10 @@ import android.util.Log
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -34,7 +34,7 @@ class CalculateActivity : AppCompatActivity() {
     private lateinit var spinnerTransportMode: Spinner
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
-    private lateinit var buttonEcoAlternative: Button
+    private lateinit var buttoninformation: Button
 
     val KakaoApiKey = BuildConfig.KAKAO_API_KEY
 
@@ -56,7 +56,15 @@ class CalculateActivity : AppCompatActivity() {
         spinnerTransportMode = findViewById(R.id.spinnerTransportMode)
         recyclerViewRoutes = findViewById(R.id.recyclerViewRoutes)
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
-        buttonEcoAlternative = findViewById(R.id.buttonEcoAlternative)
+        buttoninformation = findViewById(R.id.buttoninformation)
+
+
+        val buttoninformation = findViewById<Button>(R.id.buttoninformation)
+        buttoninformation .setOnClickListener {
+            // MyPageActivity로 이동하는 인텐트 생성
+            val intent = Intent(this, CalculateInformationActivity::class.java)
+            startActivity(intent)
+        }
 
         // RecyclerView 설정
         recyclerViewOriginResults.layoutManager = LinearLayoutManager(this)
@@ -105,10 +113,8 @@ class CalculateActivity : AppCompatActivity() {
             }
         }
 
-        // 친환경 대안 보기 버튼 클릭 리스너
-        buttonEcoAlternative.setOnClickListener {
-            showEcoAlternatives()
-        }
+
+
     }
 
     // 장소 검색 함수
@@ -297,14 +303,6 @@ class CalculateActivity : AppCompatActivity() {
         return distanceInKm * emissionFactor
     }
 
-    private fun showEcoAlternatives() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("친환경 대안")
-            .setMessage("탄소 배출량을 줄일 수 있는 대안:\n\n- 도보\n- 자전거\n- 대중교통 이용")
-            .setPositiveButton("확인") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .create()
-            .show()
-    }
+
+
 }

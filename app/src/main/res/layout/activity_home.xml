@@ -47,7 +47,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/green"
-                android:text="원하는 경로의 탄소배출량을 계산해보세요" />
+                android:text="원하는 경로의 자동차 탄소배출량을 계산해보세요" />
 
         </LinearLayout>
 

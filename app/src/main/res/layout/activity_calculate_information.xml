@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:text="1) 탄소 배출량 계산 공식"
+        tools:layout_editor_absoluteX="42dp"
+        tools:layout_editor_absoluteY="53dp" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="탄소 배출량 (kg CO₂) = 거리 (km) × 배출 계수 (kg CO₂/km)"
+        tools:layout_editor_absoluteX="66dp"
+        tools:layout_editor_absoluteY="85dp"
+        android:layout_margin="15dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text = "2) 각 교통수단에 따른 배출 계수"
+        android:layout_margin="15dp"
+        />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:text="버스: 약 0.04 ~ 0.1 kg CO₂/인·km" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="전철/기차: 약 0.02 ~ 0.06 kg CO₂/인·km"
+        android:layout_margin="5dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="비행기: 약 0.15 ~ 0.25 kg CO₂/인·km"
+        android:layout_margin="5dp"
+        />
+
+</LinearLayout>

@@ -67,6 +67,9 @@
 
         <activity android:name=".ConfirmActivity"
             android:exported="true"></activity>
+        <activity android:name=".CalculateInformationActivity"
+            android:exported="true"
+            ></activity>
 
 
     </application>
