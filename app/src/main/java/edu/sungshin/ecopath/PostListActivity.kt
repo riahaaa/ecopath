@@ -60,22 +60,24 @@ class PostListActivity : AppCompatActivity() {
 
         // 실시간 리스너로 데이터 변화 감지
         firestore.collection("posts")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
                     Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
                     return@addSnapshotListener
                 }
 
-                postList.clear()
-                for (document in snapshots!!.documents) {
-                    val post = document.toObject(Post::class.java)
-                    if (post != null) {
-                        postList.add(post)
+                if (snapshots != null) {
+                    postList.clear()
+                    for (document in snapshots.documents) {
+                        val post = document.toObject(Post::class.java)
+                        if (post != null) {
+                            postList.add(post)
+                        }
                     }
+                    postAdapter.notifyDataSetChanged() // 데이터 변경사항을 어댑터에 반영
                 }
-                postAdapter.notifyDataSetChanged() // 데이터 변경사항을 어댑터에 반영
             }
+
 
         // 현재 로그인된 사용자의 uid 가져오기
         val uid = auth.currentUser?.uid
@@ -145,9 +147,11 @@ class PostListActivity : AppCompatActivity() {
                     val imageUrl = document.getString("imageUrl")
                     val timestamp = document.getTimestamp("timestamp")
                     val username = document.getString("username") ?: "알 수 없음" // username 추가
+                    val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
+                    val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
 
                     // Firestore에서 데이터를 가져오면서 Post 객체 생성 (작성자 ID로 userId 사용)
-                    postList.add(Post(postId, userId, title, content, imageUrl, timestamp))
+                    postList.add(Post(postId, userId, title, content, imageUrl, timestamp, likes, commentCount))
                 }
 
                 // 데이터가 변경되었음을 알리고 RecyclerView 갱신
@@ -157,6 +161,7 @@ class PostListActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     override fun onResume() {
         super.onResume()
