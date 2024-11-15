@@ -3,6 +3,7 @@ package edu.sungshin.ecopath
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -32,6 +33,7 @@ class PostDetailActivity : AppCompatActivity() {
     private val auth = FirebaseAuth.getInstance()
     private lateinit var commentAdapter: CommentAdapter
     private val commentList = mutableListOf<Comment>()
+    private lateinit var backButton: ImageButton  // 추가된 부분
     private val realtimeDatabase = FirebaseDatabase.getInstance().reference
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,7 +50,11 @@ class PostDetailActivity : AppCompatActivity() {
         buttonSubmitComment = findViewById(R.id.buttonSubmitComment)
         textViewLikes = findViewById(R.id.textViewLikes)
         buttonLike = findViewById(R.id.buttonLike)
-
+        backButton = findViewById(R.id.backButton)  // 백 버튼 초기화
+        // 백 버튼 클릭 리스너 추가
+        backButton.setOnClickListener {
+            onBackPressed()  // 뒤로 가기 동작
+        }
         // Intent로 전달된 게시글 데이터 받기
         val postId = intent.getStringExtra("postId") ?: ""  // postId가 없을 경우 빈 문자열로 처리
         if (postId.isEmpty()) {
@@ -185,5 +191,9 @@ class PostDetailActivity : AppCompatActivity() {
             .addOnFailureListener { e ->
                 Toast.makeText(this, "댓글을 불러오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+    }
+    // 백 버튼 클릭 시 뒤로 가기 동작
+    override fun onBackPressed() {
+        super.onBackPressed()  // 기본 뒤로 가기 동작
     }
 }

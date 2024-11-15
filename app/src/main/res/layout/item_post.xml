@@ -3,7 +3,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="8dp">
-
     <!-- 작성자 이름 상단에 표시 -->
     <TextView
         android:id="@+id/textViewAuthor"
@@ -13,7 +12,8 @@
         android:textSize="18sp"
         android:textStyle="bold"
         android:paddingBottom="4dp"
-        android:fontFamily="sans-serif-medium" />
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="20dp"/>
 
     <!-- 작성 시간 표시 -->
     <TextView
