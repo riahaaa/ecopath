@@ -66,8 +66,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="이미지 선택"
-        android:backgroundTint="@color/green" /> <!-- 초록색 배경색 -->
-    <!-- 게시하기 버튼-->
+        android:backgroundTint="@color/green" />
     <Button
         android:id="@+id/buttonPost"
         android:layout_width="wrap_content"

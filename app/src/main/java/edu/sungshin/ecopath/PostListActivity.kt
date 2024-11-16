@@ -20,7 +20,7 @@ import com.google.firebase.firestore.Query
 
 data class Post(
     val postid: String = "", // 게시글 고유 ID
-    val username: String = "", // 게시글 작성자 ID를 저장할 필드
+    var username: String = "", // 게시글 작성자 ID를 저장할 필드
     val title: String = "",
     val content: String = "",
     val imageUrl: String? = null,
@@ -85,7 +85,7 @@ class PostListActivity : AppCompatActivity() {
             database.child("ecopath").child("UserAccount").child(uid).child("id")
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
-                    val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
+                    val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음2"
                     // Firestore에서 게시물 불러오기 (최신순 정렬)
                     loadPosts(username, postList)
                 }
@@ -109,8 +109,9 @@ class PostListActivity : AppCompatActivity() {
 
         // 메뉴 버튼 클릭 리스너
         imageButton.setOnClickListener {
-            // 예: 메뉴 버튼 클릭 시 메뉴 열기 (추후 기능 구현)
-            Toast.makeText(this, "메뉴 버튼 클릭됨", Toast.LENGTH_SHORT).show()
+            // 메뉴 화면으로 이동
+            val intent = Intent(this, MyContentActivity::class.java)
+            startActivity(intent)
         }
 
         // 아이템 클릭 리스너 추가
@@ -133,40 +134,72 @@ class PostListActivity : AppCompatActivity() {
 
     // Firestore에서 게시물 불러오기 함수
     private fun loadPosts(username: String, postList: MutableList<Post>) {
-        firestore.collection("posts")
-            .orderBy("timestamp", Query.Direction.DESCENDING)
+        // 먼저 Realtime Database에서 username을 가져오기
+        database.child("ecopath").child("UserAccount").child("id")
             .get()
-            .addOnSuccessListener { documents ->
-                postList.clear() // 중복 방지
-                for (document in documents) {
-                    val postid = document.id  // Firestore 문서의 ID를 postid로 사용
-                    val title = document.getString("title") ?: ""
-                    val content = document.getString("content") ?: ""
-                    val imageUrl = document.getString("imageUrl")
-                    val timestamp = document.getTimestamp("timestamp")
-                    val postUsername = document.getString("username") ?: "알 수 없음" // username 추가
-                    val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
-                    val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
+            .addOnSuccessListener { dataSnapshot ->
+                val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"  // userId 가져오기
 
-                    // Firestore에서 데이터를 가져오면서 Post 객체 생성
-                    postList.add(Post(postid, postUsername, title, content, imageUrl, timestamp, likes, commentCount))
-                }
+                // Firestore에서 userId로 게시물 불러오기
+                firestore.collection("posts")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .get()
+                    .addOnSuccessListener { documents ->
+                        postList.clear() // 중복 방지
+                        val postsToAdd = mutableListOf<Post>() // 임시 리스트로 데이터를 저장
 
-// 데이터가 변경되었음을 알리고 RecyclerView 갱신
-                postAdapter.notifyDataSetChanged()
+                        for (document in documents) {
+                            val postid = document.id  // Firestore 문서의 ID를 postid로 사용
+                            val title = document.getString("title") ?: ""
+                            val content = document.getString("content") ?: ""
+                            val imageUrl = document.getString("imageUrl")
+                            val timestamp = document.getTimestamp("timestamp")
+                            val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
+                            val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
 
+                            // Firestore에서 데이터를 가져오면서 Post 객체 생성
+                            val post = Post(postid, userId, title, content, imageUrl, timestamp, likes, commentCount)
+
+                            // 각 게시물에 작성자 이름을 추가
+                            database.child("ecopath").child("UserAccount").child("id")
+
+                                .get()
+                                .addOnSuccessListener { usernameSnapshot ->
+                                    val postUsername = usernameSnapshot.getValue(String::class.java) ?: "알 수 없음4"
+                                    post.username = postUsername  // 작성자 이름을 추가
+
+                                    postsToAdd.add(post) // 임시 리스트에 추가
+
+                                    // 모든 데이터를 처리한 후 RecyclerView 갱신
+                                    if (postsToAdd.size == documents.size()) {
+                                        postList.clear() // 기존 리스트 초기화
+                                        postList.addAll(postsToAdd) // 새 데이터로 갱신
+                                        postAdapter.notifyDataSetChanged() // RecyclerView 갱신
+                                    }
+                                }
+                                .addOnFailureListener {
+                                    Toast.makeText(this, "작성자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                                }
+                        }
+                    }
+                    .addOnFailureListener {
+                        Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "사용자 정보를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
+
+
+
 
     override fun onResume() {
         super.onResume()
         // 화면으로 돌아올 때마다 게시물 목록을 새로 불러오기
         val uid = auth.currentUser?.uid
         if (uid != null) {
-            database.child("ecopath").child("UserAccount").child(uid).child("username")
+            database.child("ecopath").child("UserAccount").child(uid).child("id")
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
                     val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"

@@ -27,7 +27,7 @@ class MyContentActivity: AppCompatActivity() {
     }
 
     // "내가 쓴 게시글" 클릭 시 실행되는 메서드
-    /*fun onModifyProfileClick(view: android.view.View) {
+    fun onModifyProfileClick(view: android.view.View) {
         // 예: 게시글 목록 화면으로 이동
         val intent = Intent(this, MyPostsActivity::class.java)
         startActivity(intent)
@@ -38,5 +38,5 @@ class MyContentActivity: AppCompatActivity() {
         // 예: 댓글 목록 화면으로 이동
         val intent = Intent(this, MyCommentsActivity::class.java)
         startActivity(intent)
-    }*/
+    }
 }

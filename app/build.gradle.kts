@@ -56,6 +56,7 @@ dependencies {
 
     // Glide (이미지 로딩 라이브러리)
     implementation("com.github.bumptech.glide:glide:4.12.0")
+    implementation("com.google.firebase:firebase-storage:21.0.1")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
 
     // Firebase UI (Firestore RecyclerView용)

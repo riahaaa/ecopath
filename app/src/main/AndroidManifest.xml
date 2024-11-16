@@ -4,6 +4,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-sdk tools:overrideLibrary="com.google.firebase.auth.ktx" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -78,7 +81,12 @@
             android:exported="true"/>
         <activity android:name=".EditPostActivity"
             android:exported="true"/>
-
+        <activity android:name=".MyContentActivity"
+            android:exported="true"/>
+        <activity android:name=".MyPostsActivity"
+            android:exported="true"/>
+        <activity android:name=".MyCommentsActivity"
+            android:exported="true"/>
 
     </application>
 </manifest>

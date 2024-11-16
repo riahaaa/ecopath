@@ -2,6 +2,7 @@ package edu.sungshin.ecopath
 
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
@@ -10,6 +11,8 @@ import android.widget.EditText
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -35,6 +38,7 @@ class CreatePostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post)
+
 
         editTextTitle = findViewById(R.id.editTextTitle)
         editTextContent = findViewById(R.id.editTextContent)
@@ -112,7 +116,7 @@ class CreatePostActivity : AppCompatActivity() {
                 "postId" to postId,
                 "title" to title,
                 "content" to content,
-                "username" to username,
+                "id" to username,
                 "imageUrl" to imageUrl,
                 "timestamp" to Timestamp.now()
             )
