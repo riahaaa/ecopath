@@ -39,8 +39,8 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewOriginResults"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="200dp"
+        android:visibility="gone"
         android:scrollbars="vertical" />
 
 
@@ -77,15 +77,15 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewDestinationResults"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="200dp"
+        android:visibility="gone"
         android:scrollbars="vertical" />
 
-    <!-- 이동수단 선택 Spinner -->
+    <!-- 자동차 종류 선택 Spinner -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="이동수단 선택"
+        android:text="자동차 종류 선택"
         android:layout_marginTop="16dp"
         android:layout_marginBottom="8dp" />
 
