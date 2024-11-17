@@ -156,9 +156,10 @@ class PostListActivity : AppCompatActivity() {
                             val timestamp = document.getTimestamp("timestamp")
                             val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
                             val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
+                            val username = document.getString("username") ?: "익명 사용자" // username 필드 가져오기
 
                             // Firestore에서 데이터를 가져오면서 Post 객체 생성
-                            val post = Post(postid, userId, title, content, imageUrl, timestamp, likes, commentCount)
+                            val post = Post(postid, username, title, content, imageUrl, timestamp, likes, commentCount)
 
                             // 각 게시물에 작성자 이름을 추가
                             database.child("ecopath").child("UserAccount").child("id")

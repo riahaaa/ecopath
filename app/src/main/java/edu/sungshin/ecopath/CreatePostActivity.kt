@@ -119,6 +119,19 @@ class CreatePostActivity : AppCompatActivity() {
         val imageRef = storageRef.child(fileName)
         imageRef.putFile(uri).await() // 업로드 완료 대기
         return imageRef.downloadUrl.await().toString() // 다운로드 URL 반환
+        try {
+            // 파일 업로드
+            imageRef.putFile(uri).await()
+            val downloadUrl = imageRef.downloadUrl.await().toString() // 다운로드 URL 반환
+
+            // 디버그용 로그
+            android.util.Log.d("CreatePostActivity", "Uploaded Image URL: $downloadUrl")
+            return downloadUrl
+        } catch (e: Exception) {
+            // 업로드 실패 로그
+            android.util.Log.e("CreatePostActivity", "Image Upload Failed: ${e.message}")
+            throw e
+        }
     }
 
     // Firestore에 게시글 저장
@@ -141,6 +154,8 @@ class CreatePostActivity : AppCompatActivity() {
         val snapshot = databaseRef.get().await()
         val usernameFromDB = snapshot.child("id").value as? String ?: "익명 사용자"
 
+
+
         // 게시글 데이터 생성
         val postId = System.currentTimeMillis().toString() // 고유 ID 생성
         val post = hashMapOf(
@@ -151,6 +166,19 @@ class CreatePostActivity : AppCompatActivity() {
             "imageUrl" to imageUrl,
             "timestamp" to Timestamp.now()
         )
+
+        try {
+            firestore.collection("posts")
+                .document(postId)
+                .set(post)
+                .await()
+
+            // Firestore 저장 성공 로그
+            android.util.Log.d("CreatePostActivity", "Post saved to Firestore with imageUrl: $imageUrl")
+        } catch (e: Exception) {
+            // 저장 실패 로그
+            android.util.Log.e("CreatePostActivity", "Post Save Failed: ${e.message}")
+        }
 
         firestore.collection("posts")
             .document(postId)
