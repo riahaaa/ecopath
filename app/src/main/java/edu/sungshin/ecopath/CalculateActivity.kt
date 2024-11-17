@@ -25,7 +25,7 @@ import java.net.URLEncoder
 class CalculateActivity : AppCompatActivity() {
 
     private lateinit var editTextOrigin: EditText
-    private lateinit var editTextDestination:EditText
+    private lateinit var editTextDestination: EditText
     private lateinit var buttonOriginSearch: Button
     private lateinit var buttonDestinationSearch: Button
     private lateinit var buttonSearch: Button
@@ -59,8 +59,7 @@ class CalculateActivity : AppCompatActivity() {
         buttoninformation = findViewById(R.id.buttoninformation)
 
 
-        val buttoninformation = findViewById<Button>(R.id.buttoninformation)
-        buttoninformation .setOnClickListener {
+        buttoninformation.setOnClickListener {
             // MyPageActivity로 이동하는 인텐트 생성
             val intent = Intent(this, CalculateInformationActivity::class.java)
             startActivity(intent)
@@ -74,10 +73,10 @@ class CalculateActivity : AppCompatActivity() {
         recyclerViewDestinationResults.setHasFixedSize(true)
 
 
-        recyclerViewRoutes.layoutManager = GridLayoutManager(this,1)
+        recyclerViewRoutes.layoutManager = GridLayoutManager(this, 1)
         recyclerViewRoutes.setHasFixedSize(true)
 
-        // Spinner
+        // 스피너
         val carType = arrayOf("자동차(휘발유, 디젤)", "전기차", "하이브리드차")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, carType)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -93,7 +92,11 @@ class CalculateActivity : AppCompatActivity() {
             }
         }
 
-        setupSearchButton(buttonDestinationSearch, editTextDestination, recyclerViewDestinationResults) { query ->
+        setupSearchButton(
+            buttonDestinationSearch,
+            editTextDestination,
+            recyclerViewDestinationResults
+        ) { query ->
             if (query.isNotEmpty()) {
                 searchPlaceWithKakao(query, isOrigin = false) { latLng ->
                     destinationLatLng = latLng
@@ -115,11 +118,14 @@ class CalculateActivity : AppCompatActivity() {
         }
 
 
-
     }
 
     // 장소 검색 함수
-    private fun searchPlaceWithKakao(query: String, isOrigin: Boolean, callback: (Pair<Double, Double>?) -> Unit) {
+    private fun searchPlaceWithKakao(
+        query: String,
+        isOrigin: Boolean,
+        callback: (Pair<Double, Double>?) -> Unit
+    ) {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
         val kakaoApiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query=$encodedQuery"
         val client = OkHttpClient()
@@ -180,7 +186,11 @@ class CalculateActivity : AppCompatActivity() {
     }
 
     // RecyclerView 설정 함수
-    private fun setupRecyclerView(recyclerView: RecyclerView, places: List<Place>, isOrigin: Boolean) {
+    private fun setupRecyclerView(
+        recyclerView: RecyclerView,
+        places: List<Place>,
+        isOrigin: Boolean
+    ) {
         val adapter = PlaceAdapter(places) { selectedPlace ->
             val latLng = Pair(selectedPlace.lat, selectedPlace.lng)
             if (isOrigin) {
@@ -196,7 +206,12 @@ class CalculateActivity : AppCompatActivity() {
     }
 
     // 검색 버튼 클릭 리스너 설정
-    private fun setupSearchButton(button: Button, editText: EditText, recyclerView: RecyclerView, searchCallback: (String) -> Unit) {
+    private fun setupSearchButton(
+        button: Button,
+        editText: EditText,
+        recyclerView: RecyclerView,
+        searchCallback: (String) -> Unit
+    ) {
         button.setOnClickListener {
             val query = editText.text.toString().trim()
             if (query.isNotEmpty()) {
@@ -215,12 +230,14 @@ class CalculateActivity : AppCompatActivity() {
 
         if (originLatLng != null && destinationLatLng != null) {
             val carType = when (selectedCarType) {
+                "자동차" -> "driving"
                 "전기차" -> "electric driving"
-                "하이브리드" -> "hybrid driving"
-                else -> "driving"  // 기본적으로 자동차
+                "하이브리드차" -> "hybrid driving"
+                else -> "driving"
             }
 
-            val url = "https://apis-navi.kakaomobility.com/v1/directions?origin=${originLatLng.second},${originLatLng.first}&destination=${destinationLatLng.second},${destinationLatLng.first}&priority=RECOMMEND&mode=$carType"
+            val url =
+                "https://apis-navi.kakaomobility.com/v1/directions?origin=${originLatLng.second},${originLatLng.first}&destination=${destinationLatLng.second},${destinationLatLng.first}&priority=RECOMMEND&mode=$carType"
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url(url)
@@ -240,45 +257,47 @@ class CalculateActivity : AppCompatActivity() {
                             }
                         } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(this@CalculateActivity, "경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@CalculateActivity,
+                                    "경로를 찾을 수 없습니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
                     }
                 } catch (e: Exception) {
                     Log.e("CalculateActivity", "Error fetching routes", e)
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(this@CalculateActivity, "경로를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(
+                            this@CalculateActivity,
+                            "경로를 가져오는 데 실패했습니다.",
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             }
         }
     }
 
-    // 경로 응답 파싱 함수
     private fun parseDirectionsApiResponse(response: String): List<Route> {
         val routeList = mutableListOf<Route>()
         val jsonObject = JSONObject(response)
         val routes = jsonObject.getJSONArray("routes")
 
-        Log.d("API_PARSED", "Routes count: ${routes.length()}")  // 경로 개수 확인
-
         for (i in 0 until routes.length()) {
             val route = routes.getJSONObject(i)
+            val summary = route.optJSONObject("summary")
 
-            val summary = route.optJSONObject("summary") // 요약이 있을 때만
-            val distance = summary?.getString("distance") ?: "Unknown distance"
-            val duration = summary?.getString("duration") ?: "Unknown duration"
-
-            // 다른 키로 자동차 타입을 추출
-            val carType = route.optString("car_type", "driving")  // 기본값 'driving'
-
-            Log.d("API_PARSED", "Route $i: distance=$distance, duration=$duration, carType=$carType")  // 경로 정보 확인
+            // 소요 시간과 거리 값 파싱
+            val distanceInMeters = summary?.optDouble("distance", 0.0) ?: 0.0
+            val durationInSeconds = summary?.optDouble("duration", 0.0) ?: 0.0
+            val carType = route.optString("car_type", "driving")
 
             routeList.add(
                 Route(
                     info = "경로 ${i + 1}",
-                    distance = distance,
-                    duration = duration,
+                    distance = String.format("%.0f", distanceInMeters), // 미터 단위로 저장
+                    duration = String.format("%.0f", durationInSeconds), // 초 단위로 저장
                     carType = carType
                 )
             )
@@ -286,23 +305,22 @@ class CalculateActivity : AppCompatActivity() {
         return routeList
     }
 
-    // 선택된 경로와 탄소 배출량 표시
     private fun showSelectedRouteAndCarbonEmission(route: Route) {
-        val durationInSeconds = route.duration.toInt()
-        val distanceInMeters = route.distance.toInt()
+        val durationInSeconds = route.duration.toDoubleOrNull()?.toInt() ?: 0
+        val distanceInMeters = route.distance.toDoubleOrNull()?.toInt() ?: 0
 
         // 포맷된 소요 시간과 거리
         val formattedDuration = formatDuration(durationInSeconds)
         val formattedDistance = formatDistance(distanceInMeters)
 
         // 탄소 배출량 계산
-        val carbonEmission = calculateCarbonEmission(route.distance, route.carType)
+        val carbonEmission = calculateCarbonEmission(distanceInMeters / 1000.0, route.carType)
         textViewCarbonEmission.text = "탄소 배출량: ${String.format("%.2f", carbonEmission)} kg"
 
         val intent = Intent(this, ConfirmActivity::class.java).apply {
             putExtra("selectedRouteInfo", route.info)
-            putExtra("selectedRouteDistance", formattedDistance)  // 포맷된 거리
-            putExtra("selectedRouteDuration", formattedDuration)  // 포맷된 시간
+            putExtra("selectedRouteDistance", formattedDistance)
+            putExtra("selectedRouteDuration", formattedDuration)
             putExtra("selectedRouteCarType", route.carType)
             putExtra("carbonEmission", carbonEmission)
         }
@@ -310,7 +328,16 @@ class CalculateActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    // 소요시간 변환 함수 (초 -> 시, 분으로 변환)
+    private fun calculateCarbonEmission(distanceInKm: Double, travelMode: String): Double {
+        val emissionFactor = when (travelMode.lowercase()) {
+            "driving" -> 0.18
+            "electric driving" -> 0.05
+            "hybrid driving" -> 0.10
+            else -> 0.18
+        }
+        return distanceInKm * emissionFactor
+    }
+
     private fun formatDuration(durationInSeconds: Int): String {
         val hours = durationInSeconds / 3600
         val minutes = (durationInSeconds % 3600) / 60
@@ -321,7 +348,6 @@ class CalculateActivity : AppCompatActivity() {
         }
     }
 
-    // 거리 변환 함수 (미터 -> 킬로미터로 변환)
     private fun formatDistance(distanceInMeters: Int): String {
         return if (distanceInMeters >= 1000) {
             val distanceInKm = distanceInMeters / 1000.0
@@ -330,28 +356,4 @@ class CalculateActivity : AppCompatActivity() {
             String.format("%d m", distanceInMeters)
         }
     }
-
-
-    // 친환경 대안 보기
-    private fun calculateCarbonEmission(distanceText: String, travelMode: String): Double {
-        val distanceInKm = try {
-            distanceText.split(" ")[0].replace(",", "").toDouble()
-        } catch (e: Exception) {
-            0.0
-        }
-
-        val emissionFactor = when (travelMode.lowercase()) {
-            "driving" -> 0.18
-            "walking" -> 0.0
-            "bicycling" -> 0.0
-            "transit" -> 0.07
-            "electric driving" -> 0.05
-            "hybrid driving" -> 0.10
-            else -> 0.18
-        }
-        return distanceInKm * emissionFactor
-    }
-
-
-
 }
