@@ -80,8 +80,8 @@ class CalculateActivity : AppCompatActivity() {
         // Spinner
         val carType = arrayOf("자동차(휘발유, 디젤)", "전기차", "하이브리드차")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, carType)
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         spinnerCarType.adapter = adapter
+        spinnerCarType.setSelection(0) // 기본값 설정
 
         // 출발지와 목적지 검색 UI 설정
         setupSearchButton(buttonOriginSearch, editTextOrigin, recyclerViewOriginResults) { query ->
@@ -110,6 +110,7 @@ class CalculateActivity : AppCompatActivity() {
                 Toast.makeText(this, "목적지를 선택해주세요.", Toast.LENGTH_SHORT).show()
             } else {
                 val selectedCarType = spinnerCarType.selectedItem.toString()  // 선택된 이동수단
+                Log.d("DEBUG", "Selected Car Type: $selectedCarType")
                 fetchRoutesFromAPI(selectedCarType)
             }
         }
@@ -214,13 +215,15 @@ class CalculateActivity : AppCompatActivity() {
         val destinationLatLng = this.destinationLatLng
 
         if (originLatLng != null && destinationLatLng != null) {
-            val carType = when (selectedCarType) {
-                "전기차" -> "electric driving"
-                "하이브리드" -> "hybrid driving"
-                else -> "driving"  // 기본적으로 자동차
-            }
+            // 모든 경로 계산을 "driving"으로 통일
+            val carType = "driving" // 경로 계산은 항상 "driving"으로 설정
 
-            val url = "https://apis-navi.kakaomobility.com/v1/directions?origin=${originLatLng.second},${originLatLng.first}&destination=${destinationLatLng.second},${destinationLatLng.first}&priority=RECOMMEND&mode=$carType"
+            Log.d("DEBUG", "Selected Car Type: $selectedCarType, API Car Type: $carType")
+
+            val url = "https://apis-navi.kakaomobility.com/v1/directions?"+
+                    "origin=${originLatLng.second},${originLatLng.first}" +
+                    "&destination=${destinationLatLng.second},${destinationLatLng.first}" +
+                    "&priority=RECOMMEND&mode=$carType"
             val client = OkHttpClient()
             val request = Request.Builder()
                 .url(url)
@@ -233,6 +236,7 @@ class CalculateActivity : AppCompatActivity() {
                         val responseData = response.body?.string()
                         if (response.isSuccessful && responseData != null) {
                             val routes = parseDirectionsApiResponse(responseData)
+
                             withContext(Dispatchers.Main) {
                                 recyclerViewRoutes.adapter = RouteAdapter(routes) { selectedRoute ->
                                     showSelectedRouteAndCarbonEmission(selectedRoute)
@@ -269,9 +273,18 @@ class CalculateActivity : AppCompatActivity() {
             val distance = summary?.getString("distance") ?: "Unknown distance"
             val duration = summary?.getString("duration") ?: "Unknown duration"
 
-            // 다른 키로 자동차 타입을 추출
+            // API에서 반환되는 car_type을 그대로 사용
             val carType = route.optString("car_type", "driving")  // 기본값 'driving'
 
+            // car_type 값을 확인하여 잘못된 값은 처리
+            Log.d("API_PARSED", "Route $i: car_type=$carType")
+
+            // 유효한 car_type 값만 처리
+            val validCarTypes = listOf("electric driving", "hybrid driving", "driving")
+            if (!validCarTypes.contains(carType)) {
+                Log.e("CalculateActivity", "Invalid car_type: $carType")
+                continue  // 잘못된 car_type이면 해당 경로를 처리하지 않음
+            }
             Log.d("API_PARSED", "Route $i: distance=$distance, duration=$duration, carType=$carType")  // 경로 정보 확인
 
             routeList.add(
@@ -332,21 +345,23 @@ class CalculateActivity : AppCompatActivity() {
     }
 
 
-    private fun calculateCarbonEmission(distanceText: String, travelMode: String): Double {
+    private fun calculateCarbonEmission(distanceText: String, carType: String): Double {
         val distanceInKm = try {
             distanceText.split(" ")[0].replace(",", "").toDouble()
         } catch (e: Exception) {
             0.0
         }
 
-        val emissionFactor = when (travelMode.lowercase()) {
+        val emissionFactor = when (carType.lowercase()) {
             "driving" -> 0.18
             "electric driving" -> 0.05
             "hybrid driving" -> 0.10
             else -> 0.18
         }
+        Log.d("DEBUG", "Carbon Emission: $(distanceInKm * emissionFactor) kg for carType: $carType, distance: $distanceInKm km")
         return distanceInKm * emissionFactor
     }
+
 
 
 
