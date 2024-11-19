@@ -236,10 +236,15 @@ open class RecyclerItemClickListener(
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
         val childView = rv.findChildViewUnder(e.x, e.y)
         if (childView != null && gestureDetector.onTouchEvent(e)) {
-            listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
+            // 버튼이 클릭된 경우는 제외
+            val isButton = childView.findViewById<View>(R.id.buttonEdit) != null || childView.findViewById<View>(R.id.buttonDelete) != null
+            if (!isButton) {
+                listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
+            }
         }
         return false
     }
+
 
     override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}

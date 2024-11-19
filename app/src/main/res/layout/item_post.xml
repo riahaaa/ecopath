@@ -3,6 +3,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="8dp">
+
     <!-- 작성자 이름 상단에 표시 -->
     <TextView
         android:id="@+id/textViewAuthor"
@@ -69,20 +70,25 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:focusable="false"> <!-- 다른 뷰가 클릭을 방해하지 않도록 설정 -->
 
         <ImageButton
             android:id="@+id/buttonEdit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_edit"
-            android:contentDescription="Edit Post" />
+            android:contentDescription="Edit Post"
+            android:clickable="true"
+            android:focusable="true"/>
 
         <ImageButton
             android:id="@+id/buttonDelete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@android:drawable/ic_menu_delete"
-            android:contentDescription="Delete Post" />
+            android:contentDescription="Delete Post"
+            android:clickable="true"
+            android:focusable="true"/>
     </LinearLayout>
 </LinearLayout>

@@ -97,6 +97,17 @@ class PostAdapter(private val postList: MutableList<Post>) :
                     Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
                 }
         }
+        // 이미지 클릭 리스너에서 의도치 않게 이동을 막는 부분을 추가
+        holder.imageViewPost.setOnClickListener {
+            // 수정 및 삭제 버튼이 클릭된 상태라면 이미지 클릭을 무시
+            if (holder.buttonEdit.isPressed || holder.buttonDelete.isPressed) {
+                return@setOnClickListener
+            }
+            val context = it.context
+            val intent = Intent(context, PostDetailActivity::class.java)
+            intent.putExtra("postId", post.postid) // 게시글 ID 전달
+            context.startActivity(intent)
+        }
     }
 
     override fun getItemCount(): Int {
