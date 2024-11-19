@@ -80,6 +80,8 @@ class PostListActivity : AppCompatActivity() {
 
         // 현재 로그인된 사용자의 uid 가져오기
         val uid = auth.currentUser?.uid
+
+        // Realtime Database에서 사용자 ID 가져오기
         if (uid != null) {
             // Realtime Database에서 사용자 ID 가져오기
             database.child("ecopath").child("UserAccount").child(uid).child("id")
@@ -95,6 +97,7 @@ class PostListActivity : AppCompatActivity() {
         } else {
             Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
         }
+
 
         // 게시물 작성 버튼 클릭 리스너 설정
         buttonCreatePost.setOnClickListener {

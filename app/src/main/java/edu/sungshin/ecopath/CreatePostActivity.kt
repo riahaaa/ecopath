@@ -44,11 +44,12 @@ class CreatePostActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_create_post)
+
         if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED) {
+            != PackageManager.PERMISSION_GRANTED
+        ) {
             ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_EXTERNAL_STORAGE), 1)
         }
-
 
         // UI 요소 초기화
         editTextTitle = findViewById(R.id.editTextTitle)
@@ -72,13 +73,10 @@ class CreatePostActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val username = auth.currentUser?.displayName ?: "익명 사용자"
-
-            // 이미지가 선택된 경우 업로드 후 게시글 저장
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val imageUrl = selectedImageUri?.let { uri -> uploadImageToStorage(uri) }
-                    savePostToFirestore(title, content, username, imageUrl)
+                    savePostToFirestore(title, content, "익명 사용자", imageUrl)
                     runOnUiThread {
                         Toast.makeText(this@CreatePostActivity, "게시물이 성공적으로 업로드되었습니다.", Toast.LENGTH_SHORT).show()
                         finish() // 작성 완료 후 액티비티 종료
@@ -108,30 +106,23 @@ class CreatePostActivity : AppCompatActivity() {
             if (selectedImageUri != null) {
                 imageView.setImageURI(selectedImageUri) // 선택한 이미지 미리보기
                 imageView.visibility = View.VISIBLE
+                android.util.Log.d("CreatePostActivity", "Selected Image URI: $selectedImageUri")
             } else {
                 Toast.makeText(this, "이미지가 선택되지 않았습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
-
-
     // Firebase Storage에 이미지 업로드 (비동기 작업)
     private suspend fun uploadImageToStorage(uri: Uri): String {
         val fileName = "images/${System.currentTimeMillis()}.jpg"
         val imageRef = storageRef.child(fileName)
-        imageRef.putFile(uri).await() // 업로드 완료 대기
-        return imageRef.downloadUrl.await().toString() // 다운로드 URL 반환
         try {
-            // 파일 업로드
             imageRef.putFile(uri).await()
-            val downloadUrl = imageRef.downloadUrl.await().toString() // 다운로드 URL 반환
-
-            // 디버그용 로그
+            val downloadUrl = imageRef.downloadUrl.await().toString()
             android.util.Log.d("CreatePostActivity", "Uploaded Image URL: $downloadUrl")
             return downloadUrl
         } catch (e: Exception) {
-            // 업로드 실패 로그
             android.util.Log.e("CreatePostActivity", "Image Upload Failed: ${e.message}")
             throw e
         }
@@ -152,15 +143,11 @@ class CreatePostActivity : AppCompatActivity() {
             return
         }
 
-        // Realtime Database에서 사용자 ID 가져오기
         val databaseRef = FirebaseDatabase.getInstance().getReference("UserAccount").child(uid)
         val snapshot = databaseRef.get().await()
         val usernameFromDB = snapshot.child("id").value as? String ?: "익명 사용자"
 
-
-
-        // 게시글 데이터 생성
-        val postId = System.currentTimeMillis().toString() // 고유 ID 생성
+        val postId = System.currentTimeMillis().toString()
         val post = hashMapOf(
             "postId" to postId,
             "title" to title,
@@ -172,22 +159,9 @@ class CreatePostActivity : AppCompatActivity() {
             "commentCount" to 0
         )
 
-        try {
-            firestore.collection("posts")
-                .document(postId)
-                .set(post)
-                .await()
-
-            // Firestore 저장 성공 로그
-            android.util.Log.d("CreatePostActivity", "Post saved to Firestore with imageUrl: $imageUrl")
-        } catch (e: Exception) {
-            // 저장 실패 로그
-            android.util.Log.e("CreatePostActivity", "Post Save Failed: ${e.message}")
-        }
-
         firestore.collection("posts")
             .document(postId)
             .set(post)
-            .await() // Firestore에 게시글 저장
+            .await()
     }
 }
