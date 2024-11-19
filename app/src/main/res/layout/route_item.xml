@@ -1,48 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
-    android:padding="10dp"
-    android:layout_marginBottom="8dp"
-    android:background="?attr/selectableItemBackground">
+    android:padding="16dp"
+    android:background="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true">
 
     <!-- 교통 수단 아이콘 -->
     <ImageView
         android:id="@+id/imageViewTransportMode"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_gravity="center_vertical"
-        android:src="@drawable/ic_car" />
+        android:layout_marginEnd="16dp"
+        android:contentDescription="교통 수단 아이콘"/>
 
-    <!-- 경로 정보 -->
+    <!-- 경로 정보 및 소요 시간 -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_weight="1"
-        android:paddingStart="8dp">
+        android:orientation="vertical">
 
+        <!-- 경로 정보 -->
         <TextView
             android:id="@+id/textViewRouteInfo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="경로 정보"
-            android:textStyle="bold"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
+        <!-- 소요 시간 -->
         <TextView
             android:id="@+id/textViewRouteDuration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="소요 시간" />
+            android:text="소요 시간"
+            android:textSize="14sp" />
 
+        <!-- 경로 거리 -->
         <TextView
             android:id="@+id/textViewRouteDistance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="거리" />
+            android:text="거리"
+            android:textSize="14sp" />
     </LinearLayout>
 
 </LinearLayout>

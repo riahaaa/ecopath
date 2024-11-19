@@ -26,30 +26,28 @@
 
         <!-- 여행지 검색 필드 -->
         <LinearLayout
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingHorizontal="10dp"
-            android:layout_marginBottom="20dp">
+            android:layout_marginBottom="20dp"
+            android:orientation="vertical"
+            android:paddingHorizontal="10dp">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="273dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:hint="여행지를 입력해보세요." />
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
-                android:id="@+id/searchDestination"
-                android:layout_width="wrap_content"
+                android:id="@+id/calculatebutton"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:backgroundTint="@color/green"
-                android:text="검색"
-                app:cornerRadius="0dp"
-                />
+                android:text="원하는 경로의 자동차 탄소배출량을 계산해보세요" />
 
         </LinearLayout>
 
@@ -107,6 +105,8 @@
             android:backgroundTint="@color/green"
             android:text="탄소배출량 계산해보기"
             android:textColorLink="@color/black" />
+
+
 
 
     </LinearLayout>

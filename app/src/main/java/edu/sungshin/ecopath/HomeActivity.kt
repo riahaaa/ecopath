@@ -24,5 +24,12 @@ class HomeActivity : AppCompatActivity() {
             val intent = Intent(this,CalculateActivity::class.java)
             startActivity(intent)
         }
+
+        val calcualteButton = findViewById<Button>(R.id.calculatebutton)
+        calcualteButton.setOnClickListener{
+            val intent = Intent(this, CalculateActivity::class.java)
+            startActivity(intent)
+
+        }
     }
 }

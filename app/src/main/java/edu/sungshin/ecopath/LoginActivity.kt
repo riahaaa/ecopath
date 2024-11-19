@@ -7,6 +7,7 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class LoginActivity : AppCompatActivity() {
 
@@ -64,17 +65,27 @@ class LoginActivity : AppCompatActivity() {
                 if (task.isSuccessful) {
                     // 로그인 성공
                     Toast.makeText(this, "로그인 성공", Toast.LENGTH_SHORT).show()
-                    val intent = Intent(this, HomeActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    // 로그인 실패
-                    Toast.makeText(
-                        this,
-                        "로그인 실패: ${task.exception?.message}",
-                        Toast.LENGTH_SHORT
-                    ).show()
+
+                    // 현재 로그인한 사용자의 UID 가져오기
+                    val user = auth.currentUser
+                    val uid = user?.uid
+
+                    if (uid != null) {
+
+                        // 홈 화면으로 이동
+                        val intent = Intent(this, HomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    } else {
+                        // 로그인 실패
+                        Toast.makeText(
+                            this,
+                            "로그인 실패: ${task.exception?.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
+
             }
     }
 }

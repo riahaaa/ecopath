@@ -1,0 +1,88 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="8dp">
+    <!-- 작성자 이름 상단에 표시 -->
+    <TextView
+        android:id="@+id/textViewAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Username"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingBottom="4dp"
+        android:fontFamily="sans-serif-medium"
+        android:layout_marginTop="20dp"/>
+
+    <!-- 작성 시간 표시 -->
+    <TextView
+        android:id="@+id/textViewTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="작성 시간"
+        android:textSize="12sp"
+        android:paddingBottom="4dp"
+        android:fontFamily="sans-serif" />
+
+    <!-- 게시글 이미지 표시 -->
+    <ImageView
+        android:id="@+id/imageViewPost"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:scaleType="centerCrop"
+        android:layout_marginBottom="8dp" />
+
+    <!-- 게시글 제목 -->
+    <TextView
+        android:id="@+id/textViewTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Title"
+        android:textSize="22sp"
+        android:fontFamily="sans-serif-medium"
+        android:paddingTop="8dp"/>
+
+    <!-- 게시글 내용 일부 표시 -->
+    <TextView
+        android:id="@+id/textViewSnippet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Snippet"
+        android:textSize="16sp"
+        android:paddingTop="8dp"/>
+
+    <TextView
+        android:id="@+id/textViewLikes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="공감 0" />
+
+    <TextView
+        android:id="@+id/textViewCommentCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="댓글 0" />
+
+    <!-- 수정 및 삭제 버튼 -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="8dp">
+
+        <ImageButton
+            android:id="@+id/buttonEdit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_edit"
+            android:contentDescription="Edit Post" />
+
+        <ImageButton
+            android:id="@+id/buttonDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@android:drawable/ic_menu_delete"
+            android:contentDescription="Delete Post" />
+    </LinearLayout>
+</LinearLayout>

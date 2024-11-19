@@ -29,5 +29,12 @@ class MyPageActivity : AppCompatActivity() {
             val intent = Intent(this, CancelServiceActivity::class.java)
             startActivity(intent)
         }
+
+        // Post 버튼 클릭 리스너 설정
+        val myContentButton = findViewById<TextView>(R.id.postListButton)
+        myContentButton.setOnClickListener {
+            val intent = Intent(this, PostListActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

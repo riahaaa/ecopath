@@ -1,3 +1,10 @@
+allprojects {
+    repositories {
+        google() // Ensure this is included
+        mavenCentral() // Add Maven Central repository
+    }
+}
+
 buildscript {
     dependencies {
         classpath("com.google.gms:google-services:4.4.2")
@@ -9,12 +16,3 @@ plugins {
     id("org.jetbrains.kotlin.android") version "1.9.10" apply false
     id("com.google.gms.google-services") version "4.4.2" apply false
 }
-
-allprojects {
-    repositories {
-        google() // Ensure this is included
-        mavenCentral() // Add Maven Central repository
-    }
-}
-
-
