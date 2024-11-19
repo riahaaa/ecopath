@@ -101,16 +101,19 @@ class CreatePostActivity : AppCompatActivity() {
     // 갤러리에서 이미지 선택 후 결과 처리
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+
         if (requestCode == REQUEST_IMAGE_PICK && resultCode == Activity.RESULT_OK) {
             selectedImageUri = data?.data
+
             if (selectedImageUri != null) {
                 imageView.setImageURI(selectedImageUri) // 선택한 이미지 미리보기
-                imageView.visibility = View.VISIBLE // ImageView를 보이게 설정
+                imageView.visibility = View.VISIBLE
             } else {
                 Toast.makeText(this, "이미지가 선택되지 않았습니다.", Toast.LENGTH_SHORT).show()
             }
         }
     }
+
 
 
     // Firebase Storage에 이미지 업로드 (비동기 작업)
@@ -164,7 +167,9 @@ class CreatePostActivity : AppCompatActivity() {
             "content" to content,
             "id" to usernameFromDB,
             "imageUrl" to imageUrl,
-            "timestamp" to Timestamp.now()
+            "timestamp" to Timestamp.now(),
+            "likes" to 0,
+            "commentCount" to 0
         )
 
         try {
