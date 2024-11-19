@@ -1,4 +1,5 @@
 import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -13,13 +14,14 @@ val localProperties = Properties().apply {
 // KAKAO_API_KEY 값을 가져오기
 val KakaoApiKey: String = localProperties.getProperty("KAKAO_API_KEY") ?: ""
 
+
 android {
     namespace = "edu.sungshin.ecopath"
     compileSdk = 35
 
     defaultConfig {
         applicationId = "edu.sungshin.ecopath"
-        minSdk = 21
+        minSdk = 23
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -53,7 +55,6 @@ android {
 }
 
 dependencies {
-    // Android 기본 라이브러리
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
@@ -79,6 +80,15 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
     // 테스트 관련 라이브러리
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+
+    // Kakao Services
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+
+    // 테스트 관련
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
