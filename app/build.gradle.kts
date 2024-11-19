@@ -1,12 +1,21 @@
+import java.util.Properties
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
 }
 
+// local.properties 파일을 읽기
+val localProperties = Properties().apply {
+    load(rootProject.file("local.properties").inputStream())
+}
+
+// KAKAO_API_KEY 값을 가져오기
+val KakaoApiKey: String = localProperties.getProperty("KAKAO_API_KEY") ?: ""
+
 android {
     namespace = "edu.sungshin.ecopath"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "edu.sungshin.ecopath"
@@ -16,6 +25,13 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // BuildConfig에 API 키 추가
+        buildConfigField("String", "KAKAO_API_KEY", "\"${KakaoApiKey}\"")
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -37,39 +53,33 @@ android {
 }
 
 dependencies {
-
+    // Android 기본 라이브러리
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.appcompat:appcompat:1.7.0")
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-
-    // Firebase BoM (Bill of Materials) 사용
+    // Firebase BoM (Bill of Materials) 설정
     implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
-
-    // Firebase 서비스 추가
-    implementation("com.google.firebase:firebase-auth-ktx")            // Firebase Authentication
-    implementation("com.google.firebase:firebase-firestore-ktx")       // Firebase Firestore
-    implementation("com.google.firebase:firebase-database-ktx")        // Firebase Realtime Database
-    implementation("com.google.firebase:firebase-storage-ktx")         // Firebase Storage
-    implementation("com.google.firebase:firebase-analytics-ktx")       // Firebase Analytics
-
-    // Glide (이미지 로딩 라이브러리)
-    implementation("com.github.bumptech.glide:glide:4.12.0")
-    implementation("com.google.firebase:firebase-storage:21.0.1")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+    implementation("com.google.firebase:firebase-auth-ktx")
+    implementation("com.google.firebase:firebase-firestore-ktx")
+    implementation("com.google.firebase:firebase-database-ktx")
+    implementation("com.google.firebase:firebase-storage-ktx")
+    implementation("com.google.firebase:firebase-analytics-ktx")
 
     // Firebase UI (Firestore RecyclerView용)
     implementation("com.firebaseui:firebase-ui-firestore:8.0.0")
 
-    // 테스트 라이브러리
+    // Glide (이미지 로딩 라이브러리)
+    implementation("com.github.bumptech.glide:glide:4.12.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    // Kakao Services
+    implementation("com.squareup.okhttp3:okhttp:4.10.0")
+
+    // 테스트 관련 라이브러리
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }
-
-
-
-
-

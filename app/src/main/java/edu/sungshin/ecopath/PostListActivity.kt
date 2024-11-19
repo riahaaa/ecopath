@@ -137,7 +137,7 @@ class PostListActivity : AppCompatActivity() {
 
     // Firestore에서 게시물 불러오기 함수
     private fun loadPosts(username: String, postList: MutableList<Post>) {
-        // 먼저 Realtime Database에서 username을 가져오기
+        // 먼저 Realtime Database에서 id을 가져오기
         database.child("ecopath").child("UserAccount").child("id")
             .get()
             .addOnSuccessListener { dataSnapshot ->
