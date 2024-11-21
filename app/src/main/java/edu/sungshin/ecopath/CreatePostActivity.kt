@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import android.widget.EditText
@@ -128,7 +129,6 @@ class CreatePostActivity : AppCompatActivity() {
         }
     }
 
-    // Firestore에 게시글 저장
     private suspend fun savePostToFirestore(
         title: String,
         content: String,
@@ -143,25 +143,40 @@ class CreatePostActivity : AppCompatActivity() {
             return
         }
 
-        val databaseRef = FirebaseDatabase.getInstance().getReference("UserAccount").child(uid)
+        val databaseRef = FirebaseDatabase.getInstance().getReference("ecopath").child("UserAccount").child(uid)
         val snapshot = databaseRef.get().await()
-        val usernameFromDB = snapshot.child("id").value as? String ?: "익명 사용자"
+
+// 로그 추가해서 데이터 확인
+        Log.d("CreatePostActivity", "Snapshot Data: ${snapshot.value}")
+        val usernameFromDB = snapshot.child("id").value as? String
+        Log.d("CreatePostActivity", "Username from DB: $usernameFromDB")
+
+        if (usernameFromDB == null) {
+            runOnUiThread {
+                Toast.makeText(this, "사용자의 id를 가져올 수 없습니다. 기본값을 사용합니다.", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
+
+
 
         val postId = System.currentTimeMillis().toString()
         val post = hashMapOf(
             "postId" to postId,
             "title" to title,
             "content" to content,
-            "id" to usernameFromDB,
+            "id" to usernameFromDB, // "id" 필드에서 사용자 이름을 가져옵니다
             "imageUrl" to imageUrl,
             "timestamp" to Timestamp.now(),
             "likes" to 0,
             "commentCount" to 0
         )
 
+        // Firestore에 게시글 저장
         firestore.collection("posts")
             .document(postId)
             .set(post)
             .await()
     }
+
 }

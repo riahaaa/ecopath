@@ -19,7 +19,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
-
+    private val db = FirebaseFirestore.getInstance() // Firestore 인스턴스
     fun getPostList(): MutableList<Post> {
         return postList
     }
@@ -43,7 +43,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
-        holder.textViewAuthor.text = post.username // 작성자 이름 표시
+        holder.textViewAuthor.text = post.username // `id`를 작성자 이름으로 설정
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
 
