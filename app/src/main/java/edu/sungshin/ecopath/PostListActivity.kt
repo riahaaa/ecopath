@@ -78,26 +78,6 @@ class PostListActivity : AppCompatActivity() {
                 }
             }
 
-        // 현재 로그인된 사용자의 uid 가져오기
-        val uid = auth.currentUser?.uid
-
-        // Realtime Database에서 사용자 ID 가져오기
-        if (uid != null) {
-            // Realtime Database에서 사용자 ID 가져오기
-            database.child("ecopath").child("UserAccount").child(uid).child("id")
-                .get()
-                .addOnSuccessListener { dataSnapshot ->
-                    val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음2"
-                    // Firestore에서 게시물 불러오기 (최신순 정렬)
-                    loadPosts(username, postList)
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "사용자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                }
-        } else {
-            Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
-        }
-
 
         // 게시물 작성 버튼 클릭 리스너 설정
         buttonCreatePost.setOnClickListener {
@@ -137,65 +117,42 @@ class PostListActivity : AppCompatActivity() {
 
     // Firestore에서 게시물 불러오기 함수
     private fun loadPosts(username: String, postList: MutableList<Post>) {
-        // 먼저 Realtime Database에서 id을 가져오기
-        database.child("ecopath").child("UserAccount").child("id")
+        // Firestore에서 게시물을 최신순으로 가져옴
+        firestore.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING)
             .get()
-            .addOnSuccessListener { dataSnapshot ->
-                val userId = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"  // userId 가져오기
+            .addOnSuccessListener { documents ->
+                postList.clear() // 중복 방지
+                val postsToAdd = mutableListOf<Post>() // 임시 리스트로 데이터를 저장
 
-                // Firestore에서 userId로 게시물 불러오기
-                firestore.collection("posts")
-                    .orderBy("timestamp", Query.Direction.DESCENDING)
-                    .get()
-                    .addOnSuccessListener { documents ->
-                        postList.clear() // 중복 방지
-                        val postsToAdd = mutableListOf<Post>() // 임시 리스트로 데이터를 저장
+                for (document in documents) {
+                    val postid = document.id  // Firestore 문서의 ID를 postid로 사용
+                    val title = document.getString("title") ?: ""
+                    val content = document.getString("content") ?: ""
+                    val imageUrl = document.getString("imageUrl")
+                    val timestamp = document.getTimestamp("timestamp")
+                    val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
+                    val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
+                    val username = document.getString("id") ?: "익명 사용자" // username 필드 가져오기
 
-                        for (document in documents) {
-                            val postid = document.id  // Firestore 문서의 ID를 postid로 사용
-                            val title = document.getString("title") ?: ""
-                            val content = document.getString("content") ?: ""
-                            val imageUrl = document.getString("imageUrl")
-                            val timestamp = document.getTimestamp("timestamp")
-                            val likes = document.getLong("likes")?.toInt() ?: 0 // likes 필드 추가
-                            val commentCount = document.getLong("commentCount")?.toInt() ?: 0 // commentCount 필드 추가
-                            val username = document.getString("username") ?: "익명 사용자" // username 필드 가져오기
+                    // Firestore에서 데이터를 가져오면서 Post 객체 생성
+                    val post = Post(postid, username, title, content, imageUrl, timestamp, likes, commentCount)
 
-                            // Firestore에서 데이터를 가져오면서 Post 객체 생성
-                            val post = Post(postid, username, title, content, imageUrl, timestamp, likes, commentCount)
+                    // 임시 리스트에 추가
+                    postsToAdd.add(post)
 
-                            // 각 게시물에 작성자 이름을 추가
-                            database.child("ecopath").child("UserAccount").child("id")
-
-                                .get()
-                                .addOnSuccessListener { usernameSnapshot ->
-                                    val postUsername = usernameSnapshot.getValue(String::class.java) ?: "알 수 없음4"
-                                    post.username = postUsername  // 작성자 이름을 추가
-
-                                    postsToAdd.add(post) // 임시 리스트에 추가
-
-                                    // 모든 데이터를 처리한 후 RecyclerView 갱신
-                                    if (postsToAdd.size == documents.size()) {
-                                        postList.clear() // 기존 리스트 초기화
-                                        postList.addAll(postsToAdd) // 새 데이터로 갱신
-                                        postAdapter.notifyDataSetChanged() // RecyclerView 갱신
-                                    }
-                                }
-                                .addOnFailureListener {
-                                    Toast.makeText(this, "작성자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                                }
-                        }
+                    // 모든 데이터를 처리한 후 RecyclerView 갱신
+                    if (postsToAdd.size == documents.size()) {
+                        postList.clear() // 기존 리스트 초기화
+                        postList.addAll(postsToAdd) // 새 데이터로 갱신
+                        postAdapter.notifyDataSetChanged() // RecyclerView 갱신
                     }
-                    .addOnFailureListener {
-                        Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                }
             }
             .addOnFailureListener {
-                Toast.makeText(this, "사용자 정보를 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
-
-
 
 
     override fun onResume() {
@@ -236,10 +193,15 @@ open class RecyclerItemClickListener(
     override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
         val childView = rv.findChildViewUnder(e.x, e.y)
         if (childView != null && gestureDetector.onTouchEvent(e)) {
-            listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
+            // 버튼이 클릭된 경우는 제외
+            val isButton = childView.findViewById<View>(R.id.buttonEdit) != null || childView.findViewById<View>(R.id.buttonDelete) != null
+            if (!isButton) {
+                listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
+            }
         }
         return false
     }
+
 
     override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
     override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}

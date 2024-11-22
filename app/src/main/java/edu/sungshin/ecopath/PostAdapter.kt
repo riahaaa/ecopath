@@ -19,7 +19,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
-
+    private val db = FirebaseFirestore.getInstance() // Firestore 인스턴스
     fun getPostList(): MutableList<Post> {
         return postList
     }
@@ -43,7 +43,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
-        holder.textViewAuthor.text = post.username // 작성자 이름 표시
+        holder.textViewAuthor.text = post.username // `id`를 작성자 이름으로 설정
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
 
@@ -96,6 +96,17 @@ class PostAdapter(private val postList: MutableList<Post>) :
                 .addOnFailureListener {
                     Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
                 }
+        }
+        // 이미지 클릭 리스너에서 의도치 않게 이동을 막는 부분을 추가
+        holder.imageViewPost.setOnClickListener {
+            // 수정 및 삭제 버튼이 클릭된 상태라면 이미지 클릭을 무시
+            if (holder.buttonEdit.isPressed || holder.buttonDelete.isPressed) {
+                return@setOnClickListener
+            }
+            val context = it.context
+            val intent = Intent(context, PostDetailActivity::class.java)
+            intent.putExtra("postId", post.postid) // 게시글 ID 전달
+            context.startActivity(intent)
         }
     }
 
