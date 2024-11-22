@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("kotlin-kapt")
 }
 
 // local.properties 파일을 읽기
@@ -75,6 +76,7 @@ dependencies {
     // Glide (이미지 로딩 라이브러리)
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+    kapt("com.github.bumptech.glide:compiler:4.15.1")
 
     // Kakao Services
     implementation("com.squareup.okhttp3:okhttp:4.10.0")

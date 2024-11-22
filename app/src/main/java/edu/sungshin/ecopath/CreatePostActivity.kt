@@ -8,10 +8,7 @@ import android.os.Bundle
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -32,6 +29,7 @@ class CreatePostActivity : AppCompatActivity() {
     private lateinit var buttonPost: Button
     private lateinit var imageView: ImageView
     private lateinit var buttonSelectImage: Button
+    private lateinit var progressBar: ProgressBar
     private var selectedImageUri: Uri? = null
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -58,6 +56,8 @@ class CreatePostActivity : AppCompatActivity() {
         buttonPost = findViewById(R.id.buttonPost)
         imageView = findViewById(R.id.imageView)
         buttonSelectImage = findViewById(R.id.buttonSelectImage)
+        progressBar = findViewById(R.id.progressBar)
+        progressBar.visibility = View.GONE
 
         // 이미지 선택 버튼 클릭 리스너
         buttonSelectImage.setOnClickListener {
@@ -76,8 +76,12 @@ class CreatePostActivity : AppCompatActivity() {
 
             lifecycleScope.launch(Dispatchers.IO) {
                 try {
+                    // 프로그레스바 표시
+                    runOnUiThread { progressBar.visibility = View.VISIBLE }
+
                     val imageUrl = selectedImageUri?.let { uri -> uploadImageToStorage(uri) }
                     savePostToFirestore(title, content, "익명 사용자", imageUrl)
+
                     runOnUiThread {
                         Toast.makeText(this@CreatePostActivity, "게시물이 성공적으로 업로드되었습니다.", Toast.LENGTH_SHORT).show()
                         finish() // 작성 완료 후 액티비티 종료
@@ -86,6 +90,9 @@ class CreatePostActivity : AppCompatActivity() {
                     runOnUiThread {
                         Toast.makeText(this@CreatePostActivity, "업로드에 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
                     }
+                } finally {
+                    // 프로그레스바 숨기기
+                    runOnUiThread { progressBar.visibility = View.GONE }
                 }
             }
         }
@@ -119,7 +126,16 @@ class CreatePostActivity : AppCompatActivity() {
         val fileName = "images/${System.currentTimeMillis()}.jpg"
         val imageRef = storageRef.child(fileName)
         try {
-            imageRef.putFile(uri).await()
+            val uploadTask = imageRef.putFile(uri)
+
+            // 업로드 상태 확인
+            uploadTask.addOnProgressListener { taskSnapshot ->
+                val progress = (100.0 * taskSnapshot.bytesTransferred / taskSnapshot.totalByteCount).toInt()
+                runOnUiThread {
+                    progressBar.progress = progress
+                }
+            }.await()
+
             val downloadUrl = imageRef.downloadUrl.await().toString()
             android.util.Log.d("CreatePostActivity", "Uploaded Image URL: $downloadUrl")
             return downloadUrl
@@ -146,37 +162,24 @@ class CreatePostActivity : AppCompatActivity() {
         val databaseRef = FirebaseDatabase.getInstance().getReference("ecopath").child("UserAccount").child(uid)
         val snapshot = databaseRef.get().await()
 
-// 로그 추가해서 데이터 확인
         Log.d("CreatePostActivity", "Snapshot Data: ${snapshot.value}")
-        val usernameFromDB = snapshot.child("id").value as? String
-        Log.d("CreatePostActivity", "Username from DB: $usernameFromDB")
-
-        if (usernameFromDB == null) {
-            runOnUiThread {
-                Toast.makeText(this, "사용자의 id를 가져올 수 없습니다. 기본값을 사용합니다.", Toast.LENGTH_SHORT).show()
-            }
-            return
-        }
-
-
+        val usernameFromDB = snapshot.child("id").value as? String ?: "익명 사용자"
 
         val postId = System.currentTimeMillis().toString()
         val post = hashMapOf(
             "postId" to postId,
             "title" to title,
             "content" to content,
-            "id" to usernameFromDB, // "id" 필드에서 사용자 이름을 가져옵니다
+            "id" to usernameFromDB,
             "imageUrl" to imageUrl,
             "timestamp" to Timestamp.now(),
             "likes" to 0,
             "commentCount" to 0
         )
 
-        // Firestore에 게시글 저장
         firestore.collection("posts")
             .document(postId)
             .set(post)
             .await()
     }
-
 }
