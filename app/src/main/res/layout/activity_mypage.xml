@@ -85,17 +85,6 @@
                 android:text="서비스 탈퇴"
                 android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/postListButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="16dp"
-                android:background="?android:attr/selectableItemBackground"
-                android:padding="10dp"
-                android:text="커뮤니티"
-                android:textSize="16sp" />
-
 
         </LinearLayout>
 
