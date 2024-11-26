@@ -32,15 +32,27 @@
             android:maxEms="15"
             android:inputType="textPassword" />
 
+        <!-- 비밀번호 재인증 버튼 추가 -->
+
+        <!-- 회원 탈퇴 버튼, 기본적으로 비활성화 상태 -->
+        <Button
+            android:id="@+id/reAuthenticateBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"
+            android:backgroundTint="@color/green"
+            android:enabled="true"
+            android:text="비밀번호 확인" />
+
         <Button
             android:id="@+id/deleteIDBtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:backgroundTint="#4CAF50"
+            android:backgroundTint="@color/green"
+            android:enabled="false"
             android:text="회원 탈퇴"
-            app:cornerRadius="0dp" />
+            android:textColor="@color/white" />
 
     </LinearLayout>
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>

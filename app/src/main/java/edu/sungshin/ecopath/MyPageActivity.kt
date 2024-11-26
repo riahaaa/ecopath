@@ -26,7 +26,7 @@ class MyPageActivity : AppCompatActivity() {
         // 서비스 탈퇴 버튼 클릭 리스너 설정
         val cancelServiceButton = findViewById<TextView>(R.id.cancelService)
         cancelServiceButton.setOnClickListener {
-            val intent = Intent(this, CancelServiceActivity::class.java)
+            val intent = Intent(this, DeleteIDActivity::class.java)
             startActivity(intent)
         }
     }
