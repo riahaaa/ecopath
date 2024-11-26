@@ -1,6 +1,7 @@
 package edu.sungshin.ecopath
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -99,67 +100,58 @@ class PostDetailActivity : AppCompatActivity() {
 
         buttonSubmitComment.setOnClickListener {
             val commentContent = editTextComment.text.toString().trim()
+            val currentUser = auth.currentUser  // 현재 로그인된 사용자 정보 가져오기
 
-            if (commentContent.isNotEmpty()) {
-                // Firestore에서 게시글 작성자의 id 가져오기
-                firestore.collection("posts").document(postId)
-                    .get()
-                    .addOnSuccessListener { document ->
-                        if (document != null && document.exists()) {
-                            // 게시글의 id 필드 가져오기
-                            val postAuthorId = document.getString("id") ?: "익명 사용자" // "id" 필드를 사용
+            if (currentUser != null && commentContent.isNotEmpty()) {
+                val userId = currentUser.uid  // 로그인된 사용자의 UID
+                Log.d("DEBUG", "User ID: $userId")  // userId가 null인지 아닌지 확인
 
-                            // 댓글 데이터 생성
-                            val newComment = hashMapOf(
-                                "username" to postAuthorId, // 게시글 작성자의 id를 댓글 작성자로 저장
-                                "content" to commentContent,
-                                "timestamp" to Timestamp.now()
-                            )
+                // Realtime Database에서 해당 UID를 사용해 사용자 id 가져오기
+                val databaseRef = FirebaseDatabase.getInstance().getReference("UserAccount").child(userId)
+                databaseRef.get().addOnSuccessListener { snapshot ->
+                    val userName = snapshot.child("id").value.toString()  // Realtime Database에서 "id" 필드 가져오기
 
-                            // 댓글 Firestore에 저장
-                            firestore.collection("posts").document(postId).collection("comments")
-                                .add(newComment)
-                                .addOnSuccessListener {
-                                    Toast.makeText(this, "댓글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
-                                    editTextComment.text.clear()
+                    val newComment = hashMapOf(
+                        "username" to userName,  // 조회된 사용자 이름을 댓글 작성자의 username으로 설정
+                        "content" to commentContent,
+                        "timestamp" to Timestamp.now()
+                    )
 
-                                    // 새 댓글 리스트에 추가
-                                    val comment = Comment(postAuthorId, commentContent, Timestamp.now())
-                                    commentList.add(comment)
-                                    commentAdapter.notifyItemInserted(commentList.size - 1)
+                    // Firestore에 댓글 저장
+                    firestore.collection("posts").document(postId).collection("comments")
+                        .add(newComment)
+                        .addOnSuccessListener {
+                            Toast.makeText(this, "댓글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
+                            editTextComment.text.clear()
 
-                                    // 댓글 수 증가
-                                    firestore.collection("posts").document(postId)
-                                        .update("commentCount", FieldValue.increment(1))
-                                        .addOnSuccessListener {
-                                            Toast.makeText(
-                                                this,
-                                                "댓글 수가 업데이트되었습니다.",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                        .addOnFailureListener { e ->
-                                            Toast.makeText(
-                                                this,
-                                                "댓글 수 업데이트 실패: ${e.message}",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
-                                        }
-                                }
+                            // 새 댓글 리스트에 추가
+                            val comment = Comment(userName, commentContent, Timestamp.now())  // 사용자 이름 사용
+                            commentList.add(comment)
+                            commentAdapter.notifyItemInserted(commentList.size - 1)
+
+                            // 댓글 수 증가
+                            firestore.collection("posts").document(postId)
+                                .update("commentCount", FieldValue.increment(1))
                                 .addOnFailureListener { e ->
-                                    Toast.makeText(this, "댓글 작성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this, "댓글 수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                                 }
-                        } else {
-                            Toast.makeText(this, "게시글 작성자의 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                         }
-                    }
-                    .addOnFailureListener { e ->
-                        Toast.makeText(this, "게시글 데이터를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "댓글 작성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }.addOnFailureListener { e ->
+                    Toast.makeText(this, "사용자 정보를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+                }
             } else {
-                Toast.makeText(this, "댓글 내용을 입력하세요.", Toast.LENGTH_SHORT).show()
+                if (currentUser == null) {
+                    Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "댓글 내용을 입력하세요.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
+
+
 
     }
 
@@ -191,13 +183,20 @@ class PostDetailActivity : AppCompatActivity() {
             .addOnSuccessListener { documents ->
                 commentList.clear()
                 for (document in documents) {
-                    val comment = document.toObject(Comment::class.java)
+                    val username = document.getString("username") ?: "익명 사용자"
+                    val content = document.getString("content") ?: "내용 없음"
+                    val timestamp = document.getTimestamp("timestamp")
+
+                    val comment = Comment(username, content, timestamp)
                     commentList.add(comment)
                 }
                 commentAdapter.notifyDataSetChanged()
             }
-            .addOnFailureListener { e -> Toast.makeText(this, "댓글을 불러오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show() }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "댓글을 불러오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
+
 
     override fun onBackPressed() {
         super.onBackPressed()

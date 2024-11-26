@@ -7,4 +7,3 @@ data class Comment(
     val content: String = "",
     val timestamp: Timestamp? = null
 )
-//댓글 데이터를 담는 파일
