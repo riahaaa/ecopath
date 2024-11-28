@@ -21,6 +21,7 @@ class EditPostActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_edit_post)
 
+
         postId = intent.getStringExtra("postId") ?: ""
 
         postTitle = findViewById(R.id.editTextTitle)

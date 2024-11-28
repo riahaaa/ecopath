@@ -153,6 +153,9 @@ class PostDetailActivity : AppCompatActivity() {
 
 
 
+
+
+
     }
 
     private fun increaseLikeCount(postId: String) {
