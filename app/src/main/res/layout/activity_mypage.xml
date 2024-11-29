@@ -47,7 +47,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="전화번호: 010-1234-5678"
+        android:text="문의: ecopath1357@gmail.com"
         android:textSize="16sp"
         android:paddingTop="16dp"/>
 
