@@ -14,8 +14,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
 
@@ -35,7 +38,7 @@ class PostDetailActivity : AppCompatActivity() {
     private lateinit var commentAdapter: CommentAdapter
     private val commentList = mutableListOf<Comment>()
     private lateinit var backButton: ImageButton
-    private val realtimeDatabase = FirebaseDatabase.getInstance().reference
+    private val database = FirebaseDatabase.getInstance().reference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -100,48 +103,56 @@ class PostDetailActivity : AppCompatActivity() {
 
         buttonSubmitComment.setOnClickListener {
             val commentContent = editTextComment.text.toString().trim()
-            val currentUser = auth.currentUser  // 현재 로그인된 사용자 정보 가져오기
+            val currentUser = auth.currentUser // 현재 로그인된 사용자 정보 가져오기
 
             if (currentUser != null && commentContent.isNotEmpty()) {
-                val userId = currentUser.uid  // 로그인된 사용자의 UID
-                Log.d("DEBUG", "User ID: $userId")  // userId가 null인지 아닌지 확인
+                val userUid = currentUser.uid // 로그인된 사용자의 UID
+                Log.d("DEBUG", "User UID: $userUid") // UID 디버그 출력
 
-                // Realtime Database에서 해당 UID를 사용해 사용자 id 가져오기
-                val databaseRef = FirebaseDatabase.getInstance().getReference("UserAccount").child(userId)
-                databaseRef.get().addOnSuccessListener { snapshot ->
-                    val userName = snapshot.child("id").value.toString()  // Realtime Database에서 "id" 필드 가져오기
+                // Realtime Database에서 사용자 이름 가져오기
+                database.child("ecopath").child("UserAccount").child(userUid)
+                    .addListenerForSingleValueEvent(object : ValueEventListener {
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                val userName = snapshot.child("id").getValue(String::class.java) ?: "알 수 없음"
 
-                    val newComment = hashMapOf(
-                        "username" to userName,  // 조회된 사용자 이름을 댓글 작성자의 username으로 설정
-                        "content" to commentContent,
-                        "timestamp" to Timestamp.now()
-                    )
+                                val newComment = hashMapOf(
+                                    "username" to userName, // 가져온 사용자 이름 설정
+                                    "content" to commentContent,
+                                    "timestamp" to Timestamp.now()
+                                )
 
-                    // Firestore에 댓글 저장
-                    firestore.collection("posts").document(postId).collection("comments")
-                        .add(newComment)
-                        .addOnSuccessListener {
-                            Toast.makeText(this, "댓글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
-                            editTextComment.text.clear()
+                                // Firestore에 댓글 저장
+                                firestore.collection("posts").document(postId).collection("comments")
+                                    .add(newComment)
+                                    .addOnSuccessListener {
+                                        Toast.makeText(this@PostDetailActivity, "댓글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
+                                        editTextComment.text.clear()
 
-                            // 새 댓글 리스트에 추가
-                            val comment = Comment(userName, commentContent, Timestamp.now())  // 사용자 이름 사용
-                            commentList.add(comment)
-                            commentAdapter.notifyItemInserted(commentList.size - 1)
+                                        // 댓글 리스트에 추가
+                                        val comment = Comment(userName, commentContent, Timestamp.now())
+                                        commentList.add(comment)
+                                        commentAdapter.notifyItemInserted(commentList.size - 1)
 
-                            // 댓글 수 증가
-                            firestore.collection("posts").document(postId)
-                                .update("commentCount", FieldValue.increment(1))
-                                .addOnFailureListener { e ->
-                                    Toast.makeText(this, "댓글 수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
-                                }
+                                        // 댓글 수 증가
+                                        firestore.collection("posts").document(postId)
+                                            .update("commentCount", FieldValue.increment(1))
+                                            .addOnFailureListener { e ->
+                                                Toast.makeText(this@PostDetailActivity, "댓글 수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                            }
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Toast.makeText(this@PostDetailActivity, "댓글 작성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    }
+                            } else {
+                                Toast.makeText(this@PostDetailActivity, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                        .addOnFailureListener { e ->
-                            Toast.makeText(this, "댓글 작성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+
+                        override fun onCancelled(error: DatabaseError) {
+                            Toast.makeText(this@PostDetailActivity, "데이터베이스 요청 취소: ${error.message}", Toast.LENGTH_SHORT).show()
                         }
-                }.addOnFailureListener { e ->
-                    Toast.makeText(this, "사용자 정보를 가져오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
+                    })
             } else {
                 if (currentUser == null) {
                     Toast.makeText(this, "로그인이 필요합니다.", Toast.LENGTH_SHORT).show()
@@ -150,6 +161,7 @@ class PostDetailActivity : AppCompatActivity() {
                 }
             }
         }
+
 
 
 
