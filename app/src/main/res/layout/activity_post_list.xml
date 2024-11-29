@@ -29,15 +29,6 @@
             android:fontFamily="sans-serif-medium"
             android:layout_centerHorizontal="true" />
 
-        <ImageButton
-            android:id="@+id/imageButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_marginLeft="350dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            app:srcCompat="@drawable/ic_menu" />
-
     </RelativeLayout>
 
 

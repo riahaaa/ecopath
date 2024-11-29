@@ -50,7 +50,6 @@ class PostListActivity : AppCompatActivity() {
         recyclerViewPosts.layoutManager = LinearLayoutManager(this)
         buttonCreatePost = findViewById(R.id.buttonCreatePost)
         backButton = findViewById(R.id.backButton)
-        imageButton = findViewById(R.id.imageButton)
         titleText = findViewById(R.id.titleText)
 
         // 게시물 리스트 초기화
@@ -90,12 +89,6 @@ class PostListActivity : AppCompatActivity() {
             finish()  // 현재 Activity 종료, 이전 화면으로 돌아감
         }
 
-        // 메뉴 버튼 클릭 리스너
-        imageButton.setOnClickListener {
-            // 메뉴 화면으로 이동
-            val intent = Intent(this, MyContentActivity::class.java)
-            startActivity(intent)
-        }
 
         // 아이템 클릭 리스너 추가
         recyclerViewPosts.addOnItemTouchListener(
