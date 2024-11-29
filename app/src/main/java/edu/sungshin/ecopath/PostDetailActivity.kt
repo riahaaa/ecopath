@@ -27,7 +27,6 @@ class PostDetailActivity : AppCompatActivity() {
     private lateinit var textViewUsername: TextView
     private lateinit var textViewTitle: TextView
     private lateinit var textViewContent: TextView
-    private lateinit var imageViewPost: ImageView
     private lateinit var recyclerViewComments: RecyclerView
     private lateinit var textViewLikes: TextView
     private lateinit var buttonLike: Button
@@ -48,7 +47,6 @@ class PostDetailActivity : AppCompatActivity() {
         textViewUsername = findViewById(R.id.textViewUsername)
         textViewTitle = findViewById(R.id.textViewTitle)
         textViewContent = findViewById(R.id.textViewContent)
-        imageViewPost = findViewById(R.id.imageViewPost)
         recyclerViewComments = findViewById(R.id.recyclerViewComments)
         editTextComment = findViewById(R.id.editTextComment)
         buttonSubmitComment = findViewById(R.id.buttonSubmitComment)
@@ -73,17 +71,10 @@ class PostDetailActivity : AppCompatActivity() {
                     val username = document.getString("id") ?: "알 수 없음"
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
-                    val imageUrl = document.getString("imageUrl")
 
                     textViewUsername.text = username
                     textViewTitle.text = title
                     textViewContent.text = content
-
-                    imageUrl?.let {
-                        Glide.with(this)
-                            .load(it)
-                            .into(imageViewPost)
-                    } ?: imageViewPost.setImageResource(R.drawable.placeholder)
 
                     loadPostData(postId)
                     loadComments(postId)
@@ -161,13 +152,6 @@ class PostDetailActivity : AppCompatActivity() {
                 }
             }
         }
-
-
-
-
-
-
-
     }
 
     private fun increaseLikeCount(postId: String) {
@@ -211,7 +195,6 @@ class PostDetailActivity : AppCompatActivity() {
                 Toast.makeText(this, "댓글을 불러오는 데 실패했습니다: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
-
 
     override fun onBackPressed() {
         super.onBackPressed()

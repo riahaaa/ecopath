@@ -9,17 +9,17 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Locale
-import android.widget.ImageView
+
 
 class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
     private val db = FirebaseFirestore.getInstance() // Firestore 인스턴스
+
     fun getPostList(): MutableList<Post> {
         return postList
     }
@@ -33,7 +33,6 @@ class PostAdapter(private val postList: MutableList<Post>) :
         val textViewCommentCount: TextView = itemView.findViewById(R.id.textViewCommentCount) // 댓글 수
         val buttonEdit: ImageButton = itemView.findViewById(R.id.buttonEdit) // 수정 버튼
         val buttonDelete: ImageButton = itemView.findViewById(R.id.buttonDelete) // 삭제 버튼
-        val imageViewPost: ImageView = itemView.findViewById(R.id.imageViewPost)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PostViewHolder {
@@ -43,7 +42,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
-        holder.textViewAuthor.text = post.username // `id`를 작성자 이름으로 설정
+        holder.textViewAuthor.text = post.username // 작성자 이름 설정
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
 
@@ -58,22 +57,18 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.textViewLikes.text = "공감 ${post.likes}"
         holder.textViewCommentCount.text = "댓글 ${post.commentCount}"
 
-        // Firestore에서 가져온 이미지 URL 있으면 Glide로 이미지 로드
-        post.imageUrl?.let {
-            Glide.with(holder.itemView.context)
-                .load(it)
-                .into(holder.imageViewPost)
-        } ?: holder.imageViewPost.setImageResource(R.drawable.placeholder)
 
-        // 이미지를 클릭할 때 게시글 상세 화면으로 이동
-        holder.imageViewPost.setOnClickListener {
-            val context = it.context
-            val intent = Intent(context, PostDetailActivity::class.java)
-            intent.putExtra("postId", post.postid) // 게시글 ID 전달
-            intent.putExtra("title", post.title) // 게시글 제목 전달
-            intent.putExtra("content", post.content) // 게시글 내용 전달
-            intent.putExtra("imageUrl", post.imageUrl) // 이미지 URL 전달
-            context.startActivity(intent)
+        // 게시글 클릭 리스너
+        holder.itemView.setOnClickListener {
+            // 수정 및 삭제 버튼이 눌리지 않은 경우에만 상세 화면으로 이동
+            if (!holder.buttonEdit.isPressed && !holder.buttonDelete.isPressed) {
+                val context = it.context
+                val intent = Intent(context, PostDetailActivity::class.java)
+                intent.putExtra("postId", post.postid) // 게시글 ID 전달
+                intent.putExtra("title", post.title) // 게시글 제목 전달
+                intent.putExtra("content", post.content) // 게시글 내용 전달
+                context.startActivity(intent)
+            }
         }
 
         // 수정 버튼 클릭 리스너
@@ -97,18 +92,8 @@ class PostAdapter(private val postList: MutableList<Post>) :
                     Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
                 }
         }
-        // 이미지 클릭 리스너에서 의도치 않게 이동을 막는 부분을 추가
-        holder.imageViewPost.setOnClickListener {
-            // 수정 및 삭제 버튼이 클릭된 상태라면 이미지 클릭을 무시
-            if (holder.buttonEdit.isPressed || holder.buttonDelete.isPressed) {
-                return@setOnClickListener
-            }
-            val context = it.context
-            val intent = Intent(context, PostDetailActivity::class.java)
-            intent.putExtra("postId", post.postid) // 게시글 ID 전달
-            context.startActivity(intent)
-        }
     }
+
 
     override fun getItemCount(): Int {
         return postList.size
