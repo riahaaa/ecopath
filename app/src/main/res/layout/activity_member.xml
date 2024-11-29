@@ -61,7 +61,7 @@
                 android:id="@+id/userId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="홍길동님, 환영합니다!"
+                android:text="환영합니다!"
                 android:textSize="18sp" />
         </LinearLayout>
 
@@ -86,7 +86,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="확인"
-                android:backgroundTint="#6200EE"
+                android:backgroundTint="#4CAF50"
                 android:textColor="#FFFFFF"/>
         </LinearLayout>
 
@@ -97,22 +97,6 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:paddingBottom="16dp">
-
-            <EditText
-                android:id="@+id/phoneInput"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_height="wrap_content"
-                android:hint="번호를 입력하세요"
-                android:background="@drawable/edit_text_background"/>
-
-            <Button
-                android:id="@+id/modifyPhoneButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="확인"
-                android:backgroundTint="#6200EE"
-                android:textColor="#FFFFFF"/>
         </LinearLayout>
 
         <!-- 비밀번호 변경 섹션 -->
@@ -160,11 +144,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="비밀번호 변경"
-            android:backgroundTint="#0288D1"
+            android:backgroundTint="#4CAF50"
             android:textColor="#FFFFFF"/>
     </LinearLayout>
 
     <!-- 전화번호 추가 -->
+
     <TextView
         android:id="@+id/phoneNumber"
         android:layout_width="wrap_content"

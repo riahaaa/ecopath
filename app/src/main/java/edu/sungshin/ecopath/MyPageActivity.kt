@@ -25,7 +25,7 @@ class MyPageActivity : AppCompatActivity() {
         // 회원정보 수정 버튼 클릭 리스너
         val modifyProfileButton = findViewById<TextView>(R.id.modifyProfile)
         modifyProfileButton.setOnClickListener {
-            val intent = Intent(this, ModifyProfileActivity::class.java)
+            val intent = Intent(this, MemberActivity::class.java)
             startActivity(intent)
         }
 

@@ -53,14 +53,8 @@
             android:exported="false"/>
         <activity android:name=".SearchPasswordActivity"
             android:exported="false"/>
-        <activity
-            android:name=".MyPageActivity"
-            android:exported="true">
-        </activity>
-        <activity
-            android:name=".ModifyProfileActivity"
-            android:exported="true">
-        </activity>
+
+
 
 
         <activity
@@ -69,13 +63,30 @@
         </activity>
 
         <activity
+            android:name=".MemberActivity"
+            android:exported="true"
+            android:label="회원정보 수정" />
+
+        <activity
+            android:name=".MyPageActivity"
+            android:exported="true"
+            android:label="마이페이지" />
+
+
+
+
+
+        <activity
             android:name=".CreatePostActivity"
             android:exported="true" >
         </activity>
+
         <activity android:name=".PostDetailActivity"
             android:exported="true"/>
+
         <activity android:name=".EditPostActivity"
             android:exported="true"/>
+
 
 
         <activity android:name=".ConfirmActivity"
@@ -84,5 +95,7 @@
             android:exported="true"/>
         <activity android:name=".DeleteIDActivity"
             android:exported="true"/>
+        
+
     </application>
 </manifest>
