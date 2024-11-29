@@ -24,7 +24,7 @@
             android:layout_weight="3"
             android:hint="출발지 입력"
             android:inputType="text"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
 
         <Button
             android:id="@+id/OriginSearchButton"
@@ -39,10 +39,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewOriginResults"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
         android:visibility="gone"
         android:scrollbars="vertical" />
-
 
     <!-- 목적지 레이블과 EditText -->
     <TextView
@@ -63,7 +63,8 @@
             android:layout_weight="3"
             android:hint="목적지 입력"
             android:inputType="text"
-            android:layout_marginBottom="16dp" />
+            android:layout_marginBottom="8dp" />
+
         <Button
             android:id="@+id/DestinationSearchButton"
             android:layout_width="0dp"
@@ -77,23 +78,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewDestinationResults"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
+        android:maxHeight="150dp"
         android:visibility="gone"
         android:scrollbars="vertical" />
-
-    <!-- 자동차 종류 선택 Spinner -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="자동차 종류 선택"
-        android:layout_marginTop="16dp"
-        android:layout_marginBottom="8dp" />
-
-    <Spinner
-        android:id="@+id/spinnerTransportMode"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp" />
 
     <!-- 경로 검색 버튼 -->
     <Button
@@ -114,9 +102,35 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewRoutes"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:maxHeight="200dp"
         android:scrollbars="vertical" />
+
+    <!-- 자동차 종류 선택 Spinner (기본 숨김 처리) -->
+    <TextView
+        android:id="@+id/textViewTransportMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="자동차 종류 선택"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone" />
+
+    <Spinner
+        android:id="@+id/spinnerTransportMode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:visibility="gone" />
+
+    <Button
+        android:id="@+id/buttonCalculateEmission"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:backgroundTint="@color/green"
+        android:text="탄소 배출량 계산"
+        android:visibility="gone"/>
 
     <!-- 탄소 배출량 출력 -->
     <TextView
@@ -126,7 +140,9 @@
         android:layout_marginTop="16dp"
         android:text="탄소 배출량:"
         android:textSize="18sp"
-        android:textStyle="bold" />
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/buttoninformation"
@@ -134,6 +150,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:backgroundTint="@color/green"
-        android:text="탄소배출량 계산은 어떻게 해야할까요?" />
+        android:text="탄소배출량 계산은 어떻게 해야할까요?"
+        android:visibility="gone"/>
 
 </LinearLayout>

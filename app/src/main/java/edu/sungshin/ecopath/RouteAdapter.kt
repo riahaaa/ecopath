@@ -31,7 +31,6 @@ class RouteAdapter(
         // 거리를 킬로미터로 변환
         val formattedDistance = formatDistance(route.distance.toInt())
         holder.distance.text = "거리: $formattedDistance"
-        holder.transportIcon.setImageResource(getTransportIcon(route.carType))
 
         holder.itemView.setOnClickListener {
             onRouteClick(route)
@@ -68,10 +67,6 @@ class RouteAdapter(
         val routeInfo: TextView = itemView.findViewById(R.id.textViewRouteInfo)
         val duration: TextView = itemView.findViewById(R.id.textViewRouteDuration)
         val distance: TextView = itemView.findViewById(R.id.textViewRouteDistance)
-        val transportIcon: ImageView = itemView.findViewById(R.id.imageViewTransportMode)
     }
 
-    private fun getTransportIcon(mode: String): Int {
-        return R.drawable.ic_car
-    }
 }

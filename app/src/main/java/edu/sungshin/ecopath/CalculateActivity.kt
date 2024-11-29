@@ -35,11 +35,15 @@ class CalculateActivity : AppCompatActivity() {
     private lateinit var recyclerViewRoutes: RecyclerView
     private lateinit var textViewCarbonEmission: TextView
     private lateinit var buttoninformation: Button
+    private lateinit var buttonCalculateEmission: Button
+
 
     val KakaoApiKey = BuildConfig.KAKAO_API_KEY
 
+
     private var originLatLng: Pair<Double, Double>? = null
     private var destinationLatLng: Pair<Double, Double>? = null
+    private var selectedRoute: Route? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,14 +61,8 @@ class CalculateActivity : AppCompatActivity() {
         recyclerViewRoutes = findViewById(R.id.recyclerViewRoutes)
         textViewCarbonEmission = findViewById(R.id.textViewCarbonEmission)
         buttoninformation = findViewById(R.id.buttoninformation)
-
-
-        val buttoninformation = findViewById<Button>(R.id.buttoninformation)
-        buttoninformation .setOnClickListener {
-            // MyPageActivity로 이동하는 인텐트 생성
-            val intent = Intent(this, CalculateInformationActivity::class.java)
-            startActivity(intent)
-        }
+        buttonCalculateEmission = findViewById(R.id.buttonCalculateEmission)
+        buttonCalculateEmission.visibility = View.GONE // 초기에는 숨김 처리
 
         // RecyclerView 설정
         recyclerViewOriginResults.layoutManager = GridLayoutManager(this, 1)
@@ -78,10 +76,10 @@ class CalculateActivity : AppCompatActivity() {
         recyclerViewRoutes.setHasFixedSize(true)
 
         // Spinner
-        val carType = arrayOf("자동차(휘발유, 디젤)", "전기차", "하이브리드차")
+        val carType = arrayOf("휘발유/디젤 차", "전기차", "하이브리드차")
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, carType)
         spinnerCarType.adapter = adapter
-        spinnerCarType.setSelection(0) // 기본값 설정
+        spinnerCarType.setVisibility(View.GONE)  // 초기에는 자동차 종류 스피너 숨기기
 
         // 출발지와 목적지 검색 UI 설정
         setupSearchButton(buttonOriginSearch, editTextOrigin, recyclerViewOriginResults) { query ->
@@ -115,17 +113,33 @@ class CalculateActivity : AppCompatActivity() {
             }
         }
 
+        // 정보 버튼 클릭 리스너
+        buttoninformation.setOnClickListener {
+            val intent = Intent(this, CalculateInformationActivity::class.java)
+            startActivity(intent)
+        }
 
-
+        // 탄소 배출량 계산 버튼 클릭 리스너
+        buttonCalculateEmission.setOnClickListener {
+            selectedRoute?.let { route ->
+                // Spinner에서 선택된 자동차 타입 가져오기
+                val selectedCarType = spinnerCarType.selectedItem.toString()
+                // 탄소 배출량 계산
+                val carbonEmission = calculateCarbonEmission(route.distance, selectedCarType)
+                textViewCarbonEmission.visibility = View.VISIBLE
+                textViewCarbonEmission.text = "탄소 배출량: ${String.format("%.2f", carbonEmission)} kgCo2"
+                buttoninformation.visibility = View.VISIBLE // 대안 제시 버튼 보이기
+            }
+        }
     }
 
     // 장소 검색 함수
     private fun searchPlaceWithKakao(query: String, isOrigin: Boolean, callback: (Pair<Double, Double>?) -> Unit) {
         val encodedQuery = URLEncoder.encode(query, "UTF-8")
-        val kakaoApiUrl = "https://dapi.kakao.com/v2/local/search/keyword.json?query=$encodedQuery"
+        val url = "https://dapi.kakao.com/v2/local/search/keyword.json?query=$encodedQuery"
         val client = OkHttpClient()
         val request = Request.Builder()
-            .url(kakaoApiUrl)
+            .url(url)
             .addHeader("Authorization", "KakaoAK $KakaoApiKey")
             .build()
 
@@ -147,10 +161,8 @@ class CalculateActivity : AppCompatActivity() {
                             places.add(Place(name, address, lat, lng))
                         }
 
-                        // 검색 결과가 없으면 3개의 '결과 없음'을 추가+
+                        // 검색 결과가 없으면 '결과 없음'
                         if (places.isEmpty()) {
-                            places.add(Place("검색 결과가 없습니다", "N/A", 0.0, 0.0))
-                            places.add(Place("검색 결과가 없습니다", "N/A", 0.0, 0.0))
                             places.add(Place("검색 결과가 없습니다", "N/A", 0.0, 0.0))
                         }
 
@@ -215,10 +227,7 @@ class CalculateActivity : AppCompatActivity() {
         val destinationLatLng = this.destinationLatLng
 
         if (originLatLng != null && destinationLatLng != null) {
-            // 모든 경로 계산을 "driving"으로 통일
-            val carType = "driving" // 경로 계산은 항상 "driving"으로 설정
-
-            Log.d("DEBUG", "Selected Car Type: $selectedCarType, API Car Type: $carType")
+            val carType = "driving"
 
             val url = "https://apis-navi.kakaomobility.com/v1/directions?"+
                     "origin=${originLatLng.second},${originLatLng.first}" +
@@ -239,20 +248,15 @@ class CalculateActivity : AppCompatActivity() {
 
                             withContext(Dispatchers.Main) {
                                 recyclerViewRoutes.adapter = RouteAdapter(routes) { selectedRoute ->
-                                    showSelectedRouteAndCarbonEmission(selectedRoute)
+                                    this@CalculateActivity.selectedRoute = selectedRoute
+                                    spinnerCarType.visibility = View.VISIBLE
+                                    buttonCalculateEmission.visibility = View.VISIBLE
                                 }
-                            }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(this@CalculateActivity, "경로를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    Log.e("CalculateActivity", "Error fetching routes", e)
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(this@CalculateActivity, "경로를 가져오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                    }
+                    Log.e("CalculateActivity", "Error fetching route", e)
                 }
             }
         }
@@ -273,96 +277,32 @@ class CalculateActivity : AppCompatActivity() {
             val distance = summary?.getString("distance") ?: "Unknown distance"
             val duration = summary?.getString("duration") ?: "Unknown duration"
 
-            // API에서 반환되는 car_type을 그대로 사용
-            val carType = route.optString("car_type", "driving")  // 기본값 'driving'
-
-            // car_type 값을 확인하여 잘못된 값은 처리
-            Log.d("API_PARSED", "Route $i: car_type=$carType")
-
-            // 유효한 car_type 값만 처리
-            val validCarTypes = listOf("electric driving", "hybrid driving", "driving")
-            if (!validCarTypes.contains(carType)) {
-                Log.e("CalculateActivity", "Invalid car_type: $carType")
-                continue  // 잘못된 car_type이면 해당 경로를 처리하지 않음
-            }
-            Log.d("API_PARSED", "Route $i: distance=$distance, duration=$duration, carType=$carType")  // 경로 정보 확인
-
             routeList.add(
                 Route(
                     info = "경로 ${i + 1}",
                     distance = distance,
-                    duration = duration,
-                    carType = carType
+                    duration = duration
                 )
             )
         }
         return routeList
     }
 
-    // 선택된 경로와 탄소 배출량 표시
-    private fun showSelectedRouteAndCarbonEmission(route: Route) {
-        val durationInSeconds = route.duration.toInt()
-        val distanceInMeters = route.distance.toInt()
-
-        // 포맷된 소요 시간과 거리
-        val formattedDuration = formatDuration(durationInSeconds)
-        val formattedDistance = formatDistance(distanceInMeters)
-
-        // 탄소 배출량 계산
-        val carbonEmission = calculateCarbonEmission(route.distance, route.carType)
-        textViewCarbonEmission.text = "탄소 배출량: ${String.format("%.2f", carbonEmission)} kgCo2"
-
-        val intent = Intent(this, ConfirmActivity::class.java).apply {
-            putExtra("selectedRouteInfo", route.info)
-            putExtra("selectedRouteDistance", formattedDistance)  // 포맷된 거리
-            putExtra("selectedRouteDuration", formattedDuration)  // 포맷된 시간
-            putExtra("selectedRouteCarType", route.carType)
-            putExtra("carbonEmission", carbonEmission)
-        }
-
-        startActivity(intent)
-    }
-
-    // 소요시간 변환 함수 (초 -> 시, 분으로 변환)
-    private fun formatDuration(durationInSeconds: Int): String {
-        val hours = durationInSeconds / 3600
-        val minutes = (durationInSeconds % 3600) / 60
-        return if (hours > 0) {
-            String.format("%d시간 %d분", hours, minutes)
-        } else {
-            String.format("%d분", minutes)
-        }
-    }
-
-    // 거리 변환 함수 (미터 -> 킬로미터로 변환)
-    private fun formatDistance(distanceInMeters: Int): String {
-        return if (distanceInMeters >= 1000) {
-            val distanceInKm = distanceInMeters / 1000.0
-            String.format("%.1f km", distanceInKm)
-        } else {
-            String.format("%d m", distanceInMeters)
-        }
-    }
-
-
+    // 탄소 배출 계산 공식
     private fun calculateCarbonEmission(distanceText: String, carType: String): Double {
         val distanceInKm = try {
             distanceText.split(" ")[0].replace(",", "").toDouble()
         } catch (e: Exception) {
+            Log.e("CalculateActivity", "Error parsing distance: $distanceText", e)
             0.0
         }
 
-        val emissionFactor = when (carType.lowercase()) {
-            "driving" -> 0.18
-            "electric driving" -> 0.05
-            "hybrid driving" -> 0.10
+        val emissionFactor = when (carType) {
+            "휘발유/디젤 차" -> 0.18
+            "전기차" -> 0.05
+            "하이브리드차" -> 0.10
             else -> 0.18
         }
-        Log.d("DEBUG", "Carbon Emission: $(distanceInKm * emissionFactor) kg for carType: $carType, distance: $distanceInKm km")
         return distanceInKm * emissionFactor
     }
-
-
-
-
 }
