@@ -89,6 +89,8 @@ dependencies {
     // Kakao Services
     implementation("com.squareup.okhttp3:okhttp:4.10.0")
 
+    implementation("androidx.viewpager2:viewpager2:1.1.0")
+
 
     // 테스트 관련
     testImplementation("junit:junit:4.13.2")

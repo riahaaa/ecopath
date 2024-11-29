@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.Query
 
+
 class HomeActivity : AppCompatActivity() {
     private lateinit var recentPostCard: CardView
     private lateinit var postTitleTextView: TextView
@@ -32,10 +33,10 @@ class HomeActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
 
         val tips = listOf(
-            TipCard("Tip 1", "차량 주행을 줄이고 대중교통을 이용해보세요.", R.drawable.tip_card1),
-            TipCard("Tip 2", "에너지 효율이 높은 LED 전구를 사용하세요.", R.drawable.tip_card2),
-            TipCard("Tip 3", "플라스틱 사용을 줄이고 재활용 가능한 제품을 사용하세요.", R.drawable.tip_card3),
-            TipCard("Tip 4", "지역에서 생산된 식품을 구매하세요.", R.drawable.tip_card4)
+            TipCard("Tip 1", "친환경 소재 제품을 사용하세요."),
+            TipCard("Tip 2", "에너지 효율이 높은 제품을 선택하세요."),
+            TipCard("Tip 3", "쓰레기를 줄이고 대중교통을 이용하세요."),
+            TipCard("Tip 4", "숲을 함부로 훼손하는 일은 하지 마세요.")
         )
 
         viewPager.adapter = TipCardAdapter(tips)
