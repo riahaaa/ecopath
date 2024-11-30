@@ -15,11 +15,11 @@
         <ImageView
             android:id="@+id/logoImage"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="164dp"
             android:layout_gravity="center"
-            android:src="@drawable/leaf"
             android:contentDescription="Leaf Logo"
-            android:padding="8dp"/>
+            android:padding="8dp"
+            android:src="@drawable/iconleaf" />
 
         <!-- 회원정보 수정 제목 -->
         <TextView
@@ -156,7 +156,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:text="전화번호: 010-1234-5678"
+        android:text="문의:ecopath1357@gmail.com"
         android:textSize="16sp"
         android:paddingTop="16dp"/>
 

@@ -6,9 +6,9 @@ import androidx.appcompat.app.AppCompatActivity
 import android.widget.EditText
 import android.widget.Button
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import android.util.Log
+import com.google.firebase.auth.EmailAuthProvider
 
 
 class MemberActivity : AppCompatActivity() {
@@ -25,13 +25,16 @@ class MemberActivity : AppCompatActivity() {
         realtimeDatabase = FirebaseDatabase.getInstance()
 
         val emailInput = findViewById<EditText>(R.id.emailInput)
+        val checkEmailButton = findViewById<Button>(R.id.modifyEmailButton) // 확인 버튼
         val currentPasswordInput = findViewById<EditText>(R.id.currentPasswordInput)
         val newPasswordInput = findViewById<EditText>(R.id.newPasswordInput)
         val confirmNewPasswordInput = findViewById<EditText>(R.id.confirmNewPasswordInput)
         val changePasswordButton = findViewById<Button>(R.id.changePasswordButton)
 
-        // 사용자 이메일 불러오기
-        loadUserData(emailInput)
+        // 사용자 이메일 확인 버튼 클릭 이벤트
+        checkEmailButton.setOnClickListener {
+            checkUserEmail(emailInput.text.toString().trim())
+        }
 
         // 비밀번호 변경 버튼 클릭 이벤트
         changePasswordButton.setOnClickListener {
@@ -43,11 +46,17 @@ class MemberActivity : AppCompatActivity() {
         }
     }
 
-    private fun loadUserData(emailInput: EditText) {
+    private fun checkUserEmail(inputEmail: String) {
+        if (inputEmail.isEmpty()) {
+            Toast.makeText(this, "이메일을 입력하세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val user = auth.currentUser
         if (user != null) {
             val userId = user.uid
             Log.d("UID 확인", "현재 UID: $userId")
+            Log.d("이메일 확인", "입력된 이메일: $inputEmail")
 
             // Realtime Database에서 사용자 데이터 가져오기
             val userRef = realtimeDatabase.reference.child("UserAccount").child(userId)
@@ -55,8 +64,16 @@ class MemberActivity : AppCompatActivity() {
 
             userRef.get()
                 .addOnSuccessListener { dataSnapshot ->
+                    Log.d("데이터 스냅샷", "스냅샷 데이터: ${dataSnapshot.value}")
                     if (dataSnapshot.exists()) {
-                        Log.d("데이터 요청 성공", "데이터: ${dataSnapshot.value}")
+                        val registeredEmail = dataSnapshot.child("email").value.toString()
+                        Log.d("이메일 확인", "등록된 이메일: $registeredEmail")
+
+                        if (inputEmail == registeredEmail) {
+                            Toast.makeText(this, "인증되었습니다.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(this, "인증에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                        }
                     } else {
                         Log.e("데이터 요청 실패", "UserAccount/$userId 경로에 데이터 없음")
                     }
@@ -64,9 +81,10 @@ class MemberActivity : AppCompatActivity() {
                 .addOnFailureListener { e ->
                     Log.e("데이터 요청 실패", "오류: ${e.message}")
                 }
-
+        } else {
+            Toast.makeText(this, "로그인된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
         }
-        }
+    }
 
 
 
@@ -106,4 +124,3 @@ class MemberActivity : AppCompatActivity() {
         }
     }
 }
-
