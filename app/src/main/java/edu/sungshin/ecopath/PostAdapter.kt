@@ -1,7 +1,6 @@
 package edu.sungshin.ecopath
 
 import android.content.Context
-import edu.sungshin.ecopath.R
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -102,7 +101,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
         return postList.size
     }
 
-   // 삭제 후 데이터를 새로 고침
+    // 삭제 후 데이터를 새로 고침
     private fun loadPosts(context: Context) {
         db.collection("posts")
             .orderBy("timestamp", Query.Direction.DESCENDING) // 최신 게시글이 맨 위로 오도록 정렬
