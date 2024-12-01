@@ -9,6 +9,9 @@
     <uses-sdk tools:overrideLibrary="com.google.firebase.auth.ktx" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
 
     <application
         android:allowBackup="true"
@@ -31,19 +34,14 @@
         </activity>
         <activity
             android:name=".LoginActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"/>
         <activity
             android:name=".HomeActivity"
-            android:exported="false">
-        </activity>
-        <activity android:name=".CalculateActivity"
-            android:exported="true">
-        </activity>
+            android:exported="false"/>
+
         <activity
             android:name=".SignUpActivity"
-            android:exported="false">
-        </activity>
+            android:exported="false"/>
         <activity
             android:name=".SearchidActivity"
             android:exported="false"
@@ -55,36 +53,27 @@
             android:exported="false"/>
         <activity
             android:name=".MyPageActivity"
-            android:exported="true">
-        </activity>
+            android:exported="true"/>
         <activity
             android:name=".MemberActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"/>
+        <activity android:name=".DeleteIDActivity"
+            android:exported="true"/>
 
         <activity
             android:name=".PostListActivity"
-            android:exported="true">
-        </activity>
-
+            android:exported="true"/>
         <activity
             android:name=".CreatePostActivity"
-            android:exported="true" >
-        </activity>
+            android:exported="true" />
         <activity android:name=".PostDetailActivity"
             android:exported="true"/>
         <activity android:name=".EditPostActivity"
             android:exported="true"/>
 
-
-
-
-        <activity android:name=".ConfirmActivity"
-            android:exported="true"/>
         <activity android:name=".CalculateInformationActivity"
             android:exported="true"/>
-        <activity android:name=".DeleteIDActivity"
+        <activity android:name=".CalculateActivity"
             android:exported="true"/>
     </application>
 </manifest>

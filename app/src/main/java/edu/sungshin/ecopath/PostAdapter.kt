@@ -1,5 +1,6 @@
 package edu.sungshin.ecopath
 
+import android.content.Context
 import edu.sungshin.ecopath.R
 import android.content.Intent
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -87,6 +89,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
                     Toast.makeText(holder.itemView.context, "게시물이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
                     postList.removeAt(position)
                     notifyItemRemoved(position) // 데이터 삭제 후 화면 갱신
+                    loadPosts(holder.itemView.context) // 게시물 목록을 다시 불러와 UI에 반영
                 }
                 .addOnFailureListener {
                     Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
@@ -97,5 +100,26 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun getItemCount(): Int {
         return postList.size
+    }
+
+   // 삭제 후 데이터를 새로 고침
+    private fun loadPosts(context: Context) {
+        db.collection("posts")
+            .orderBy("timestamp", Query.Direction.DESCENDING) // 최신 게시글이 맨 위로 오도록 정렬
+            .get()
+            .addOnSuccessListener { documents ->
+                postList.clear() // 기존 데이터 초기화
+                for (document in documents) {
+                    val post = document.toObject(Post::class.java)
+                    postList.add(post)
+                }
+                notifyDataSetChanged() // 데이터 새로 고침 후 UI 갱신
+                // 삭제 후 데이터 로드 성공
+                Toast.makeText(context, "게시물 목록이 새로 고침되었습니다.", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener {
+                // 실패 시 메시지 처리
+                Toast.makeText(context, "게시물 목록을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
     }
 }

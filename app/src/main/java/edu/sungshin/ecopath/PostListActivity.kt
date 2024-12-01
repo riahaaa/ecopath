@@ -1,11 +1,7 @@
 package edu.sungshin.ecopath
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.MotionEvent
-import android.view.GestureDetector
-import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -86,20 +82,7 @@ class PostListActivity : AppCompatActivity() {
             finish()
         }
 
-        // 아이템 클릭 리스너 추가
-        recyclerViewPosts.addOnItemTouchListener(
-            RecyclerItemClickListener(this, recyclerViewPosts, object : RecyclerItemClickListener.OnItemClickListener {
-                override fun onItemClick(view: View, position: Int) {
-                    val post = postList[position]
-                    val intent = Intent(this@PostListActivity, PostDetailActivity::class.java)
-                    intent.putExtra("username", post.username)
-                    intent.putExtra("title", post.title)
-                    intent.putExtra("content", post.content)
-                    intent.putExtra("postId", post.postid)
-                    startActivity(intent)
-                }
-            })
-        )
+
     }
 
     // Firestore에서 게시물 불러오기 함수
@@ -147,36 +130,4 @@ class PostListActivity : AppCompatActivity() {
                 }
         }
     }
-}
-
-// RecyclerItemClickListener
-open class RecyclerItemClickListener(
-    context: Context,
-    recyclerView: RecyclerView,
-    private val listener: OnItemClickListener
-) : RecyclerView.OnItemTouchListener {
-
-    interface OnItemClickListener {
-        fun onItemClick(view: View, position: Int)
-    }
-
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onSingleTapUp(e: MotionEvent): Boolean {
-            return true
-        }
-    })
-
-    override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-        val childView = rv.findChildViewUnder(e.x, e.y)
-        if (childView != null && gestureDetector.onTouchEvent(e)) {
-            val isButton = childView.findViewById<View>(R.id.buttonEdit) != null || childView.findViewById<View>(R.id.buttonDelete) != null
-            if (!isButton) {
-                listener.onItemClick(childView, rv.getChildAdapterPosition(childView))
-            }
-        }
-        return false
-    }
-
-    override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
-    override fun onRequestDisallowInterceptTouchEvent(disallowIntercept: Boolean) {}
 }
