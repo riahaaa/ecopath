@@ -33,10 +33,10 @@ class HomeActivity : AppCompatActivity() {
         viewPager = findViewById(R.id.viewPager)
 
         val tips = listOf(
-            TipCard("Tip 1", "친환경 소재 제품을 사용하세요."),
-            TipCard("Tip 2", "에너지 효율이 높은 제품을 선택하세요."),
-            TipCard("Tip 3", "쓰레기를 줄이고 대중교통을 이용하세요."),
-            TipCard("Tip 4", "숲을 함부로 훼손하는 일은 하지 마세요.")
+            TipCard("Tip 1", "Tip 1 : 친환경 소재 제품을 사용하세요.",R.drawable.eco_friendly),
+            TipCard("Tip 2", "Tip 2 : 에너지 효율이 높은 제품을 선택하세요.",R.drawable.energy_efficiency),
+            TipCard("Tip 3", "Tip 3 : 쓰레기를 줄이고 대중교통을 이용하세요.",R.drawable.bus_icon),
+            TipCard("Tip 4", "Tip 4 :숲을 함부로 훼손하는 일은 하지 마세요.",R.drawable.icon_tree)
         )
 
         viewPager.adapter = TipCardAdapter(tips)

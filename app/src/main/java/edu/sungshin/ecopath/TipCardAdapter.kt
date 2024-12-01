@@ -13,6 +13,7 @@ class TipCardAdapter(private val tips: List<TipCard>) : RecyclerView.Adapter<Tip
 
     inner class TipCardViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.title)
+        val image: ImageView = itemView.findViewById(R.id.imageView3)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TipCardViewHolder {
@@ -23,6 +24,7 @@ class TipCardAdapter(private val tips: List<TipCard>) : RecyclerView.Adapter<Tip
     override fun onBindViewHolder(holder: TipCardViewHolder, position: Int) {
         val tip = tips[position]
         holder.title.text = tip.content
+        holder.image.setImageResource(tip.imageResId)
     }
 
     override fun getItemCount(): Int {
