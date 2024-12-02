@@ -4,35 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#D4EDD2">
+    android:background="#87D681">
 
-
+    <!-- 이미지뷰 -->
     <ImageView
         android:id="@+id/imageView3"
         android:layout_width="64dp"
         android:layout_height="66dp"
         android:layout_marginStart="5dp"
-        android:layout_marginEnd="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/iconleaf"
         tools:ignore="MissingConstraints" />
 
-
+    <!-- 텍스트뷰 -->
     <TextView
         android:id="@+id/title"
-        android:layout_width="248dp"
-        android:layout_height="110dp"
-        android:layout_marginEnd="28dp"
-        android:text="에너지 소비 효율이 높은 제품을 선택합니다"
-        android:textColor="#040404"
-        android:textSize="20sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.558"
-        tools:ignore="MissingConstraints" />
+        android:layout_width="0dp"
+    android:layout_height="wrap_content"
+    android:layout_marginEnd="28dp"
+    android:text="에너지 소비 효율이 높은 제품을 선택합니다"
+    android:textColor="#040404"
+    android:textSize="20sp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toEndOf="@id/imageView3"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="0.597"
+    tools:ignore="MissingConstraints" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
