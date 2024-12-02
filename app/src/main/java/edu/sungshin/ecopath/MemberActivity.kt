@@ -7,9 +7,7 @@ import android.widget.EditText
 import android.widget.Button
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import android.util.Log
 import com.google.firebase.auth.EmailAuthProvider
-
 
 class MemberActivity : AppCompatActivity() {
 
@@ -24,8 +22,9 @@ class MemberActivity : AppCompatActivity() {
         auth = FirebaseAuth.getInstance()
         realtimeDatabase = FirebaseDatabase.getInstance()
 
+        // UI 요소 초기화
         val emailInput = findViewById<EditText>(R.id.emailInput)
-        val checkEmailButton = findViewById<Button>(R.id.modifyEmailButton) // 확인 버튼
+        val checkEmailButton = findViewById<Button>(R.id.modifyEmailButton)
         val currentPasswordInput = findViewById<EditText>(R.id.currentPasswordInput)
         val newPasswordInput = findViewById<EditText>(R.id.newPasswordInput)
         val confirmNewPasswordInput = findViewById<EditText>(R.id.confirmNewPasswordInput)
@@ -54,39 +53,29 @@ class MemberActivity : AppCompatActivity() {
 
         val user = auth.currentUser
         if (user != null) {
-            val userId = user.uid
-            Log.d("UID 확인", "현재 UID: $userId")
-            Log.d("이메일 확인", "입력된 이메일: $inputEmail")
-
-            // Realtime Database에서 사용자 데이터 가져오기
-            val userRef = realtimeDatabase.reference.child("UserAccount").child(userId)
-            Log.d("데이터 요청", "요청 경로: UserAccount/$userId")
+            val userUid = user.uid
+            val userRef = realtimeDatabase.getReference("ecopath").child("UserAccount").child(userUid)
 
             userRef.get()
                 .addOnSuccessListener { dataSnapshot ->
-                    Log.d("데이터 스냅샷", "스냅샷 데이터: ${dataSnapshot.value}")
                     if (dataSnapshot.exists()) {
                         val registeredEmail = dataSnapshot.child("email").value.toString()
-                        Log.d("이메일 확인", "등록된 이메일: $registeredEmail")
-
                         if (inputEmail == registeredEmail) {
-                            Toast.makeText(this, "인증되었습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "이메일 인증 성공.", Toast.LENGTH_SHORT).show()
                         } else {
-                            Toast.makeText(this, "인증에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, "등록된 이메일과 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
                         }
                     } else {
-                        Log.e("데이터 요청 실패", "UserAccount/$userId 경로에 데이터 없음")
+                        Toast.makeText(this, "사용자 데이터를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
                 }
                 .addOnFailureListener { e ->
-                    Log.e("데이터 요청 실패", "오류: ${e.message}")
+                    Toast.makeText(this, "데이터 조회 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         } else {
             Toast.makeText(this, "로그인된 사용자가 없습니다.", Toast.LENGTH_SHORT).show()
         }
     }
-
-
 
     private fun changePassword(currentPassword: String, newPassword: String, confirmNewPassword: String) {
         if (currentPassword.isEmpty() || newPassword.isEmpty() || confirmNewPassword.isEmpty()) {
@@ -110,7 +99,21 @@ class MemberActivity : AppCompatActivity() {
                         user.updatePassword(newPassword)
                             .addOnCompleteListener { updateTask ->
                                 if (updateTask.isSuccessful) {
-                                    Toast.makeText(this, "비밀번호가 성공적으로 변경되었습니다.", Toast.LENGTH_SHORT).show()
+                                    // 비밀번호 변경 성공 후 Realtime Database 업데이트
+                                    val userUid = user.uid
+                                    val userRef = FirebaseDatabase.getInstance().reference
+                                        .child("ecopath")
+                                        .child("UserAccount")
+                                        .child(userUid)
+
+                                    // 변경된 비밀번호를 Realtime Database에 저장
+                                    userRef.child("password").setValue(newPassword)
+                                        .addOnSuccessListener {
+                                            Toast.makeText(this, "비밀번호 변경 성공 및 Realtime Database 업데이트 완료.", Toast.LENGTH_SHORT).show()
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Toast.makeText(this, "Realtime Database 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        }
                                 } else {
                                     Toast.makeText(this, "비밀번호 변경 실패: ${updateTask.exception?.message}", Toast.LENGTH_SHORT).show()
                                 }
@@ -120,7 +123,9 @@ class MemberActivity : AppCompatActivity() {
                     }
                 }
         } else {
-            Toast.makeText(this, "사용자 인증에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "사용자 인증 실패.", Toast.LENGTH_SHORT).show()
         }
     }
+
 }
+
