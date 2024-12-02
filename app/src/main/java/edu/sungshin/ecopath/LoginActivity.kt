@@ -77,13 +77,18 @@ class LoginActivity : AppCompatActivity() {
                         startActivity(intent)
                         finish()
                     } else {
-                        // 로그인 실패
-                        Toast.makeText(
-                            this,
-                            "로그인 실패: ${task.exception?.message}",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(this, "사용자 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
                     }
+                } else {
+                    // 로그인 실패
+                    val errorMessage = when (task.exception?.message) {
+                        "The email address is badly formatted." -> "잘못된 이메일 형식입니다."
+                        "There is no user record corresponding to this identifier. The user may have been deleted." -> "존재하지 않는 이메일입니다."
+                        "The password is invalid or the user does not have a password." -> "비밀번호가 잘못되었습니다."
+                        else -> "로그인 실패: ${task.exception?.message}"
+                    }
+                    Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
+
                 }
 
             }

@@ -1,6 +1,7 @@
 package edu.sungshin.ecopath
 
 import android.os.Bundle
+import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -16,6 +17,7 @@ class DeleteIDActivity : AppCompatActivity() {
     private lateinit var database: FirebaseDatabase
     private lateinit var passwordEditText: EditText
     private lateinit var deleteIDBtn: Button
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,10 +78,18 @@ class DeleteIDActivity : AppCompatActivity() {
     }
 
     private fun deleteUserAccount(user: FirebaseUser) {
-        val userId = user.uid
+        val userUid = auth.currentUser?.uid
+        if (userUid == null) {
+            Log.e("DeleteIDActivity", "userUid가 null입니다.")
+            Toast.makeText(this, "유저 정보를 가져올 수 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        } else {
+            Log.d("DeleteIDActivity", "삭제할 사용자 ID: $userUid")
+        }
+
 
         // Realtime Database에서 해당 사용자 데이터 삭제
-        val userRef = database.getReference("UserAccount").child(userId)
+        val userRef = database.getReference("ecopath").child("UserAccount").child(userUid)
         userRef.removeValue().addOnCompleteListener { task ->
             if (task.isSuccessful) {
                 // Firebase Authentication에서 사용자 삭제

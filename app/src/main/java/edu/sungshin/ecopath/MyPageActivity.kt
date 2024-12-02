@@ -14,6 +14,7 @@ class MyPageActivity : AppCompatActivity() {
     private lateinit var userIdTextView: TextView
     private val auth = FirebaseAuth.getInstance()
     private val database = FirebaseDatabase.getInstance().reference
+    private lateinit var closeButton: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,11 +22,18 @@ class MyPageActivity : AppCompatActivity() {
 
         // TextView 참조
         userIdTextView = findViewById(R.id.userId)
+        closeButton = findViewById(R.id.closeButton)
 
         // 회원정보 수정 버튼 클릭 리스너
         val modifyProfileButton = findViewById<TextView>(R.id.modifyProfile)
         modifyProfileButton.setOnClickListener {
             val intent = Intent(this, MemberActivity::class.java)
+            startActivity(intent)
+        }
+        // 회원가입 탈퇴 버튼 클릭 리스너
+        val deleteAccountButton = findViewById<TextView>(R.id.cancelService)
+        deleteAccountButton.setOnClickListener {
+            val intent = Intent(this, DeleteIDActivity::class.java)
             startActivity(intent)
         }
 
@@ -57,6 +65,10 @@ class MyPageActivity : AppCompatActivity() {
         } else {
             userIdTextView.text = "로그인이 필요합니다."
             Log.e("DEBUG", "No user is logged in")
+        }
+        // 닫기 버튼 클릭 리스너
+        closeButton.setOnClickListener {
+            finish() // 현재 액티비티 종료
         }
     }
 }
