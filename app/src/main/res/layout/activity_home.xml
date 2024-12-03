@@ -72,7 +72,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="탄소 저감 활동과 관련하여 소통해보세요!"
+            android:text="탄소 저감 활동과 관련하여 소통해보세요 !"
             android:textColor="@color/green"
             android:textSize="20sp"
             android:textStyle="bold" />
