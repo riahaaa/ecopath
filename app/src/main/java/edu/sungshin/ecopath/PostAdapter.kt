@@ -13,6 +13,8 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
+import com.google.firebase.auth.FirebaseAuth
+import android.util.Log
 
 
 class PostAdapter(private val postList: MutableList<Post>) :
@@ -46,6 +48,20 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.textViewAuthor.text = post.username // 작성자 이름 설정
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
+
+        val postOwnerId = post.username
+        Log.d("Debug", "Post Owner UID: $postOwnerId")  // 여기에 추가
+
+
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser != null) {
+            val currentUserId = currentUser.uid
+            Log.d("Debug", "Current User UID: $currentUserId")  // 로그인한 사용자 UID 확인
+        } else {
+            Log.d("Debug", "No user is logged in.")
+        }
+
+
 
         // 작성 시간을 읽기 쉬운 형식으로 변환하여 표시
         post.timestamp?.let {

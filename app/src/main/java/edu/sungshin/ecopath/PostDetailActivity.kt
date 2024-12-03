@@ -65,9 +65,15 @@ class PostDetailActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
+                    val postOwnerId = document.getString("id") ?: "Unknown"
+
+
                     val username = document.getString("id") ?: "알 수 없음"
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
+                    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+                    Log.d("Debug", "Current User UID: $currentUserId, Post Owner UID: $username")
+
 
                     textViewUsername.text = username
                     textViewTitle.text = title
@@ -102,7 +108,8 @@ class PostDetailActivity : AppCompatActivity() {
                     .addListenerForSingleValueEvent(object : ValueEventListener {
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.exists()) {
-                                val userName = snapshot.child("id").getValue(String::class.java) ?: "알 수 없음"
+                                val userName =
+                                    snapshot.child("id").getValue(String::class.java) ?: "알 수 없음"
 
                                 val newComment = hashMapOf(
                                     "username" to userName, // 가져온 사용자 이름 설정
@@ -111,14 +118,20 @@ class PostDetailActivity : AppCompatActivity() {
                                 )
 
                                 // Firestore에 댓글 저장
-                                firestore.collection("posts").document(postId).collection("comments")
+                                firestore.collection("posts").document(postId)
+                                    .collection("comments")
                                     .add(newComment)
                                     .addOnSuccessListener {
-                                        Toast.makeText(this@PostDetailActivity, "댓글이 작성되었습니다.", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this@PostDetailActivity,
+                                            "댓글이 작성되었습니다.",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                         editTextComment.text.clear()
 
                                         // 댓글 리스트에 추가
-                                        val comment = Comment(userName, commentContent, Timestamp.now())
+                                        val comment =
+                                            Comment(userName, commentContent, Timestamp.now())
                                         commentList.add(comment)
                                         commentAdapter.notifyItemInserted(commentList.size - 1)
 
@@ -126,19 +139,35 @@ class PostDetailActivity : AppCompatActivity() {
                                         firestore.collection("posts").document(postId)
                                             .update("commentCount", FieldValue.increment(1))
                                             .addOnFailureListener { e ->
-                                                Toast.makeText(this@PostDetailActivity, "댓글 수 업데이트 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(
+                                                    this@PostDetailActivity,
+                                                    "댓글 수 업데이트 실패: ${e.message}",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
                                             }
                                     }
                                     .addOnFailureListener { e ->
-                                        Toast.makeText(this@PostDetailActivity, "댓글 작성 실패: ${e.message}", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(
+                                            this@PostDetailActivity,
+                                            "댓글 작성 실패: ${e.message}",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
                                     }
                             } else {
-                                Toast.makeText(this@PostDetailActivity, "사용자 정보를 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(
+                                    this@PostDetailActivity,
+                                    "사용자 정보를 찾을 수 없습니다.",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            Toast.makeText(this@PostDetailActivity, "데이터베이스 요청 취소: ${error.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@PostDetailActivity,
+                                "데이터베이스 요청 취소: ${error.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     })
             } else {
@@ -158,7 +187,13 @@ class PostDetailActivity : AppCompatActivity() {
             val currentLikes = snapshot.getLong("likes") ?: 0
             transaction.update(postRef, "likes", currentLikes + 1)
         }.addOnSuccessListener { loadPostData(postId) }
-            .addOnFailureListener { e -> Toast.makeText(this, "공감 실패: ${e.message}", Toast.LENGTH_SHORT).show() }
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    this,
+                    "공감 실패: ${e.message}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
     }
 
     private fun loadPostData(postId: String) {
@@ -197,3 +232,4 @@ class PostDetailActivity : AppCompatActivity() {
         super.onBackPressed()
     }
 }
+

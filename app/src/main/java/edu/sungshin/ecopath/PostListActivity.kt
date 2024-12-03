@@ -21,7 +21,8 @@ data class Post(
     val content: String = "",
     val timestamp: Timestamp? = null,
     val likes: Int = 0,  // 공감 수
-    val commentCount: Int = 0  // 댓글 수
+    val commentCount: Int = 0,  // 댓글 수
+    val id: String?=""
 )
 
 class PostListActivity : AppCompatActivity() {
@@ -114,6 +115,7 @@ class PostListActivity : AppCompatActivity() {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     override fun onResume() {
         super.onResume()
