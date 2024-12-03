@@ -41,6 +41,7 @@
                 android:textColor="@color/green"
                 android:textSize="20sp"
                 android:textStyle="bold" />
+
             <!-- 나뭇잎 이미지 추가 -->
             <ImageView
                 android:id="@+id/leafImage"
@@ -55,15 +56,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 
-            <Button
-                android:id="@+id/calculatebutton"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-
-                android:backgroundTint="@color/green"
-                android:text="탄소배출량 계산" />
-
         </LinearLayout>
+
+        <!-- 탄소배출량 계산 버튼 -->
+        <Button
+            android:id="@+id/calculatebutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/green"
+            android:text="탄소배출량 계산"
+            app:layout_constraintTop_toBottomOf="@id/leafImage"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <!-- 커뮤니티 소개 -->
         <TextView
@@ -108,7 +111,6 @@
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
 
         <!-- 탄소 저감 팁 슬라이드 (ViewPager2) -->
         <TextView
