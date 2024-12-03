@@ -9,23 +9,19 @@ import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import java.text.SimpleDateFormat
 import java.util.Locale
-import com.google.firebase.auth.FirebaseAuth
-import android.util.Log
-
 
 class PostAdapter(private val postList: MutableList<Post>) :
     RecyclerView.Adapter<PostAdapter.PostViewHolder>() {
 
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
-    private val db = FirebaseFirestore.getInstance() // Firestore 인스턴스
-
-    fun getPostList(): MutableList<Post> {
-        return postList
-    }
+    private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
 
     class PostViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val textViewAuthor: TextView = itemView.findViewById(R.id.textViewAuthor)
@@ -45,25 +41,10 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     override fun onBindViewHolder(holder: PostViewHolder, position: Int) {
         val post = postList[position]
-        holder.textViewAuthor.text = post.username // 작성자 이름 설정
+
+        holder.textViewAuthor.text = post.username
         holder.textViewTitle.text = post.title
-        holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
-
-        val postOwnerId = post.username
-        Log.d("Debug", "Post Owner UID: $postOwnerId")  // 여기에 추가
-
-
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            val currentUserId = currentUser.uid
-            Log.d("Debug", "Current User UID: $currentUserId")  // 로그인한 사용자 UID 확인
-        } else {
-            Log.d("Debug", "No user is logged in.")
-        }
-
-
-
-        // 작성 시간을 읽기 쉬운 형식으로 변환하여 표시
+        holder.textViewSnippet.text = post.content.take(100)
         post.timestamp?.let {
             holder.textViewTimestamp.text = dateFormat.format(it.toDate())
         } ?: run {
@@ -74,16 +55,19 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.textViewLikes.text = "공감 ${post.likes}"
         holder.textViewCommentCount.text = "댓글 ${post.commentCount}"
 
-
         // 게시글 클릭 리스너
         holder.itemView.setOnClickListener {
-            // 수정 및 삭제 버튼이 눌리지 않은 경우에만 상세 화면으로 이동
+            if (post.postid.isNullOrEmpty()) {
+                android.util.Log.e("PostAdapter", "Invalid post ID")
+                Toast.makeText(it.context, "잘못된 게시글입니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             if (!holder.buttonEdit.isPressed && !holder.buttonDelete.isPressed) {
                 val context = it.context
                 val intent = Intent(context, PostDetailActivity::class.java)
-                intent.putExtra("postId", post.postid) // 게시글 ID 전달
-                intent.putExtra("title", post.title) // 게시글 제목 전달
-                intent.putExtra("content", post.content) // 게시글 내용 전달
+                intent.putExtra("postId", post.postid)
+                intent.putExtra("title", post.title)
+                intent.putExtra("content", post.content)
                 context.startActivity(intent)
             }
         }
@@ -93,48 +77,44 @@ class PostAdapter(private val postList: MutableList<Post>) :
             val context = it.context
             val intent = Intent(context, EditPostActivity::class.java)
             intent.putExtra("postId", post.postid) // 게시글 ID를 넘겨줘야 수정이 가능
+
+            // 디버깅 로그 추가
+            android.util.Log.d("PostAdapter", "Edit clicked: ID=${post.postid}")
+
             context.startActivity(intent)
         }
 
-        // 삭제 버튼 클릭 리스너
         holder.buttonDelete.setOnClickListener {
-            val db = FirebaseFirestore.getInstance()
-            db.collection("posts").document(post.postid).delete()
-                .addOnSuccessListener {
-                    Toast.makeText(holder.itemView.context, "게시물이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
-                    postList.removeAt(position)
-                    notifyItemRemoved(position) // 데이터 삭제 후 화면 갱신
-                    loadPosts(holder.itemView.context) // 게시물 목록을 다시 불러와 UI에 반영
+            val context = holder.itemView.context
+            val docRef = db.collection("posts").document(post.postid) // 게시글 ID를 기준으로 문서 참조
+
+            // Firestore 문서 가져오기
+            docRef.get().addOnSuccessListener { document ->
+                // 문서가 존재하고 삭제 권한이 있는지 확인
+                if (document.exists() && document.getString("uid") == auth.currentUser?.uid) {
+                    // 문서 삭제
+                    docRef.delete()
+                        .addOnSuccessListener {
+                            Toast.makeText(context, "게시물이 삭제되었습니다.", Toast.LENGTH_SHORT).show()
+
+                            // 삭제 성공 시 postList에서 항목 제거
+                            val position = holder.bindingAdapterPosition
+                            if (position != RecyclerView.NO_POSITION) {
+                                postList.removeAt(position)
+                                notifyItemRemoved(position) // RecyclerView 갱신
+                            }
+                        }
+                        .addOnFailureListener {
+                            Toast.makeText(context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
+                        }
+                } else {
+                    Toast.makeText(context, "삭제 권한이 없습니다.", Toast.LENGTH_SHORT).show()
                 }
-                .addOnFailureListener {
-                    Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
-                }
+            }.addOnFailureListener {
+                Toast.makeText(context, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-
-    override fun getItemCount(): Int {
-        return postList.size
-    }
-
-    // 삭제 후 데이터를 새로 고침
-    private fun loadPosts(context: Context) {
-        db.collection("posts")
-            .orderBy("timestamp", Query.Direction.DESCENDING) // 최신 게시글이 맨 위로 오도록 정렬
-            .get()
-            .addOnSuccessListener { documents ->
-                postList.clear() // 기존 데이터 초기화
-                for (document in documents) {
-                    val post = document.toObject(Post::class.java)
-                    postList.add(post)
-                }
-                notifyDataSetChanged() // 데이터 새로 고침 후 UI 갱신
-                // 삭제 후 데이터 로드 성공
-                Toast.makeText(context, "게시물 목록이 새로 고침되었습니다.", Toast.LENGTH_SHORT).show()
-            }
-            .addOnFailureListener {
-                // 실패 시 메시지 처리
-                Toast.makeText(context, "게시물 목록을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-            }
-    }
+    override fun getItemCount(): Int = postList.size
 }

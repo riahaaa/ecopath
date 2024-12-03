@@ -84,10 +84,11 @@ class CreatePostActivity : AppCompatActivity() {
 
         val postId = System.currentTimeMillis().toString()
         val post = hashMapOf(
-            "postId" to postId,
+            "postid" to postId,
             "title" to title,
             "content" to content,
-            "id" to usernameFromDB,
+            "username" to usernameFromDB,
+            "uid" to uid,  // 추가된 부분: 사용자의 UID를 저장합니다.
             "timestamp" to Timestamp.now(),
             "likes" to 0,
             "commentCount" to 0
