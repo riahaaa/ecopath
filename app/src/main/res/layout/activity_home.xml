@@ -59,7 +59,6 @@
                 android:id="@+id/calculatebutton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:backgroundTint="@color/green"
                 android:text="탄소배출량 계산" />
 

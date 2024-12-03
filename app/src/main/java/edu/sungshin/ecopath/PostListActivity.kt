@@ -2,7 +2,6 @@ package edu.sungshin.ecopath
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -12,12 +11,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 
 data class Post(
-    var postid: String = "", // 게시글 고유 ID
+    val postid: String = "", // 게시글 고유 ID
     var username: String = "", // 게시글 작성자 ID를 저장할 필드
     val title: String = "",
     val content: String = "",
@@ -31,11 +29,9 @@ class PostListActivity : AppCompatActivity() {
 
     private lateinit var recyclerViewPosts: RecyclerView
     private lateinit var postAdapter: PostAdapter
-    private val postList = mutableListOf<Post>()
-    private val db = FirebaseFirestore.getInstance()
+    private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
-    private var lastVisible: DocumentSnapshot? = null
-    private var isLoading = false
+    private val database = FirebaseDatabase.getInstance().reference
     private lateinit var buttonCreatePost: ImageButton
     private lateinit var backButton: ImageButton
     private lateinit var titleText: TextView
@@ -47,27 +43,34 @@ class PostListActivity : AppCompatActivity() {
         // 뷰 초기화
         recyclerViewPosts = findViewById(R.id.recyclerViewPosts)
         recyclerViewPosts.layoutManager = LinearLayoutManager(this)
-
         buttonCreatePost = findViewById(R.id.buttonCreatePost)
         backButton = findViewById(R.id.backButton)
         titleText = findViewById(R.id.titleText)
 
         // 게시물 리스트 초기화
+        val postList = mutableListOf<Post>()
         postAdapter = PostAdapter(postList)
         recyclerViewPosts.adapter = postAdapter
 
-        // 게시물 로드
-        loadPosts()
+        // 실시간 리스너로 데이터 변화 감지
+        firestore.collection("posts")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    return@addSnapshotListener
+                }
 
-        // 스크롤 리스너 추가 (무한 스크롤)
-        recyclerViewPosts.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (!recyclerView.canScrollVertically(1) && !isLoading) { // 끝에 도달하고 로딩 중이 아니면
-                    loadMorePosts()
+                if (snapshots != null) {
+                    postList.clear()
+                    for (document in snapshots.documents) {
+                        val post = document.toObject(Post::class.java)
+                        if (post != null) {
+                            postList.add(post)
+                        }
+                    }
+                    postAdapter.notifyDataSetChanged()
                 }
             }
-        })
 
         // 게시물 작성 버튼 클릭 리스너 설정
         buttonCreatePost.setOnClickListener {
@@ -79,58 +82,38 @@ class PostListActivity : AppCompatActivity() {
         backButton.setOnClickListener {
             finish()
         }
+
+
     }
 
-    // Firestore에서 첫 게시물 불러오기 함수
-    private fun loadPosts() {
-        isLoading = true
-        db.collection("posts")
+    // Firestore에서 게시물 불러오기 함수
+    private fun loadPosts(username: String, postList: MutableList<Post>) {
+        firestore.collection("posts")
             .orderBy("timestamp", Query.Direction.DESCENDING)
-            .limit(20)
             .get()
             .addOnSuccessListener { documents ->
-                postList.clear() // 기존 데이터 초기화
+                postList.clear()
+                val postsToAdd = mutableListOf<Post>()
+
                 for (document in documents) {
-                    Log.d("LoadPosts", "Document ID: ${document.id}, Data: ${document.data}")
-                    val post = document.toObject(Post::class.java)
-                    post.postid = document.id // Firestore 문서 ID를 postid로 설정
-                    postList.add(post)
+                    val postid = document.id
+                    val title = document.getString("title") ?: ""
+                    val content = document.getString("content") ?: ""
+                    val timestamp = document.getTimestamp("timestamp")
+                    val likes = document.getLong("likes")?.toInt() ?: 0
+                    val commentCount = document.getLong("commentCount")?.toInt() ?: 0
+                    val username = document.getString("id") ?: "익명 사용자"
+
+                    val post = Post(postid, username, title, content, timestamp, likes, commentCount)
+                    postsToAdd.add(post)
                 }
-                lastVisible = documents.documents.lastOrNull() // 마지막 문서 저장
+
+                postList.addAll(postsToAdd)
                 postAdapter.notifyDataSetChanged()
-                isLoading = false
             }
             .addOnFailureListener {
                 Toast.makeText(this, "게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                isLoading = false
             }
-    }
-
-    // Firestore에서 추가 게시물 불러오기 함수 (무한 스크롤)
-    private fun loadMorePosts() {
-        lastVisible?.let { lastDoc ->
-            isLoading = true
-            db.collection("posts")
-                .orderBy("timestamp", Query.Direction.DESCENDING)
-                .startAfter(lastDoc) // 마지막 문서부터 시작
-                .limit(20)
-                .get()
-                .addOnSuccessListener { documents ->
-                    for (document in documents) {
-                        Log.d("LoadMorePosts", "Document ID: ${document.id}, Data: ${document.data}")
-                        val post = document.toObject(Post::class.java)
-                        post.postid = document.id // Firestore 문서 ID를 postid로 설정
-                        postList.add(post)
-                    }
-                    lastVisible = documents.documents.lastOrNull() // 마지막 문서 저장
-                    postAdapter.notifyDataSetChanged()
-                    isLoading = false
-                }
-                .addOnFailureListener {
-                    Toast.makeText(this, "추가 게시물을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
-                    isLoading = false
-                }
-        }
     }
 
 
@@ -138,12 +121,11 @@ class PostListActivity : AppCompatActivity() {
         super.onResume()
         val uid = auth.currentUser?.uid
         if (uid != null) {
-            val database = FirebaseDatabase.getInstance().reference
             database.child("ecopath").child("UserAccount").child(uid).child("id")
                 .get()
                 .addOnSuccessListener { dataSnapshot ->
                     val username = dataSnapshot.getValue(String::class.java) ?: "알 수 없음"
-                    loadPosts() // 사용자 이름을 받는 곳이 없으므로 바로 게시물 로딩
+                    loadPosts(username, postAdapter.getPostList())
                 }
                 .addOnFailureListener {
                     Toast.makeText(this, "사용자 이름을 불러오는 데 실패했습니다.", Toast.LENGTH_SHORT).show()
