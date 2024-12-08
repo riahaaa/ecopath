@@ -74,7 +74,7 @@
             android:contentDescription="Edit Post"
             android:focusable="true"
             android:src="@android:drawable/ic_menu_edit"
-            android:visibility="gone" />
+            />
 
         <ImageButton
             android:id="@+id/buttonDelete"
@@ -84,6 +84,6 @@
             android:contentDescription="Delete Post"
             android:focusable="true"
             android:src="@android:drawable/ic_menu_delete"
-            android:visibility="gone" />
+            />
     </LinearLayout>
 </LinearLayout>

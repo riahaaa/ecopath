@@ -23,7 +23,6 @@ class PostAdapter(private val postList: MutableList<Post>) :
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) // 시간 표시
     private val db = FirebaseFirestore.getInstance() // Firestore 인스턴스
-    private val uid = FirebaseAuth.getInstance().currentUser?.uid
 
 
 
@@ -99,19 +98,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
         }
 
 
-
-        when (uid == post.id) {
-            true -> {
-                holder.buttonEdit.visibility = View.VISIBLE
-                holder.buttonDelete.visibility = View.VISIBLE
-            }
-            false -> {
-                holder.buttonEdit.visibility = View.GONE
-                holder.buttonDelete.visibility = View.GONE
-            }
-        }
-
-
+        
         // 수정 버튼 클릭 리스너
         holder.buttonEdit.setOnClickListener {
             val context = it.context
