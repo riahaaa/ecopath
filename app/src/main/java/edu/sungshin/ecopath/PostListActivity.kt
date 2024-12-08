@@ -2,6 +2,7 @@ package edu.sungshin.ecopath
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -22,7 +23,7 @@ data class Post(
     val timestamp: Timestamp? = null,
     val likes: Int = 0,  // 공감 수
     val commentCount: Int = 0,  // 댓글 수
-    val id: String?=""
+    val id: String?="" //작성자 UID (이메일)
 )
 
 class PostListActivity : AppCompatActivity() {
@@ -103,6 +104,7 @@ class PostListActivity : AppCompatActivity() {
                     val likes = document.getLong("likes")?.toInt() ?: 0
                     val commentCount = document.getLong("commentCount")?.toInt() ?: 0
                     val username = document.getString("id") ?: "익명 사용자"
+                    val id = document.getString("id") ?: ""
 
                     val post = Post(postid, username, title, content, timestamp, likes, commentCount)
                     postsToAdd.add(post)
@@ -133,3 +135,5 @@ class PostListActivity : AppCompatActivity() {
         }
     }
 }
+
+
