@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import com.google.firebase.auth.FirebaseAuth
 import android.util.Log
+import com.google.firebase.database.FirebaseDatabase
 
 
 class PostAdapter(private val postList: MutableList<Post>) :
@@ -52,20 +53,6 @@ class PostAdapter(private val postList: MutableList<Post>) :
         holder.textViewTitle.text = post.title
         holder.textViewSnippet.text = post.content.take(100) // 본문 일부만 표시
 
-        val postOwnerId = post.username
-        Log.d("Debug", "Post Owner UID: $postOwnerId")  // 여기에 추가
-
-
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        if (currentUser != null) {
-            val currentUserId = currentUser.uid
-            Log.d("Debug", "Current User UID: $currentUserId")  // 로그인한 사용자 UID 확인
-        } else {
-            Log.d("Debug", "No user is logged in.")
-        }
-
-
-
         // 작성 시간을 읽기 쉬운 형식으로 변환하여 표시
         post.timestamp?.let {
             holder.textViewTimestamp.text = dateFormat.format(it.toDate())
@@ -76,6 +63,26 @@ class PostAdapter(private val postList: MutableList<Post>) :
         // 공감 수와 댓글 수 설정
         holder.textViewLikes.text = "공감 ${post.likes}"
         holder.textViewCommentCount.text = "댓글 ${post.commentCount}"
+
+        // 현재 로그인한 사용자의 UID 가져오기
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val currentUserId = currentUser?.uid
+
+        if (currentUserId != null) {
+            getUsernameByUid(currentUserId) { currentUsername ->
+                val postOwnerId = post.username // 게시글 작성자의 별칭
+                if (currentUsername == postOwnerId) {
+                    holder.buttonEdit.visibility = View.VISIBLE
+                    holder.buttonDelete.visibility = View.VISIBLE
+                } else {
+                    holder.buttonEdit.visibility = View.GONE
+                    holder.buttonDelete.visibility = View.GONE
+                }
+            }
+        } else {
+            holder.buttonEdit.visibility = View.GONE
+            holder.buttonDelete.visibility = View.GONE
+        }
 
 
         // 게시글 클릭 리스너
@@ -127,11 +134,22 @@ class PostAdapter(private val postList: MutableList<Post>) :
                     Toast.makeText(holder.itemView.context, "게시물 삭제 실패", Toast.LENGTH_SHORT).show()
                 }
         }
+
     }
-
-
     override fun getItemCount(): Int {
         return postList.size
+    }
+    fun getUsernameByUid(uid: String, callback: (String?) -> Unit) {
+        val database = FirebaseDatabase.getInstance().reference
+        database.child("ecopath").child("UserAccount").child(uid).child("id")
+            .get()
+            .addOnSuccessListener { snapshot ->
+                val username = snapshot.getValue(String::class.java)
+                callback(username)
+            }
+            .addOnFailureListener {
+                callback(null)
+            }
     }
 
     // 삭제 후 데이터를 새로 고침

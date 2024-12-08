@@ -17,7 +17,7 @@ import com.google.firebase.firestore.Query
 
 data class Post(
     val postid: String = "", // 게시글 고유 ID
-    var username: String = "", // 게시글 작성자 ID를 저장할 필드
+    var username: String = "", // 게시글 작성자 ID-
     val title: String = "",
     val content: String = "",
     val timestamp: Timestamp? = null,
