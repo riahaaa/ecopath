@@ -3,6 +3,7 @@ package edu.sungshin.ecopath
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.Timestamp
@@ -16,6 +17,9 @@ class EditPostActivity : AppCompatActivity() {
     private lateinit var postContent: EditText
     private lateinit var buttonSave: Button
     private val firestore = FirebaseFirestore.getInstance()
+    private lateinit var backButton: ImageButton
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +31,9 @@ class EditPostActivity : AppCompatActivity() {
         postTitle = findViewById(R.id.editTextTitle)
         postContent = findViewById(R.id.editTextContent)
         buttonSave = findViewById(R.id.buttonSave)
+        backButton = findViewById(R.id.backButton)
+
+        backButton.setOnClickListener { onBackPressed() }
 
 
 
@@ -67,5 +74,8 @@ class EditPostActivity : AppCompatActivity() {
                     Toast.makeText(this, "수정 실패: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
+
+
+
     }
 }

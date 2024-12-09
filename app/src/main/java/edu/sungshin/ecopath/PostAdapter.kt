@@ -67,6 +67,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
         val currentUser = FirebaseAuth.getInstance().currentUser
         val currentUserId = currentUser?.uid
 
+        // getUsernameByUid함수에서
         if (currentUserId != null) {
             getUsernameByUid(currentUserId) { currentUsername ->
                 val postOwnerId = post.username // 게시글 작성자의 별칭
@@ -126,6 +127,7 @@ class PostAdapter(private val postList: MutableList<Post>) :
     override fun getItemCount(): Int {
         return postList.size
     }
+
     fun getUsernameByUid(uid: String, callback: (String?) -> Unit) {
         val database = FirebaseDatabase.getInstance().reference
         database.child("ecopath").child("UserAccount").child(uid).child("id")

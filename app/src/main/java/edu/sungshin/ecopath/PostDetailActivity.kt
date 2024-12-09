@@ -51,6 +51,7 @@ class PostDetailActivity : AppCompatActivity() {
         buttonLike = findViewById(R.id.buttonLike)
         backButton = findViewById(R.id.backButton)
 
+
         backButton.setOnClickListener { onBackPressed() }
 
         val postId = intent.getStringExtra("postId") ?: ""
@@ -65,9 +66,6 @@ class PostDetailActivity : AppCompatActivity() {
             .get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
-                    val postOwnerId = document.getString("id") ?: "Unknown"
-
-
                     val username = document.getString("id") ?: "알 수 없음"
                     val title = document.getString("title") ?: "제목 없음"
                     val content = document.getString("content") ?: "내용 없음"
@@ -78,6 +76,8 @@ class PostDetailActivity : AppCompatActivity() {
                     textViewUsername.text = username
                     textViewTitle.text = title
                     textViewContent.text = content
+
+
 
                     loadPostData(postId)
                     loadComments(postId)

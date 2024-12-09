@@ -88,6 +88,7 @@ class CreatePostActivity : AppCompatActivity() {
             "title" to title,
             "content" to content,
             "id" to usernameFromDB,
+            "postOwnerUid" to uid,
             "timestamp" to Timestamp.now(),
             "likes" to 0,
             "commentCount" to 0
